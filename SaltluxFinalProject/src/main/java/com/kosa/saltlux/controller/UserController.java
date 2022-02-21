@@ -26,7 +26,9 @@ public class UserController {
 	}
 	
 	@RequestMapping("/index")
-	public String index() {
+	public String index(Model model) {
+		model.addAttribute("data", "[{country: 'USA', value: 70}, {country: 'KOR', value: 15}]");
+		
 		return "index";
 	}
 }

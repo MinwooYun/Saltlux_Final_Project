@@ -24,6 +24,18 @@
 	<!-- CSS Files -->
 	<link id="pagestyle" href="resources/assets/css/material-kit.css?v=3.0.0" rel="stylesheet" />
 	
+	<style>
+	#chartdiv {
+	  width: 100%;
+	  height: 500px;
+	}
+	</style>
+	
+	<!-- Resources -->
+	<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+	<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+	<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+	
 </head>
 <!-- Navbar -->
 	<div class="container position-sticky z-index-sticky top-0">
