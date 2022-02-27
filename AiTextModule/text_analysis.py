@@ -1,46 +1,226 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from konlpy.tag import Mecab
 
+from sklearn.feature_extraction.text import CountVectorizer
+
+import warnings
+warnings.filterwarnings('ignore')
+
 '''
-    - 주어진 텍스트에 대하여 다양한 수치를 제공하는 클래스
-    - param: text_noun_list (전처리 모듈에서 도출한 명사 품사만 태깅된 단어 리스트)
+    - 주어진 텍스트에 대하여 키워드, 연관어 및 관련 점수를 도출하는 클래스
+    - param: text (전처리 모듈에서 전처리를 수행한 제목 + 본문 text)
 '''
-class TextScore():
-    def __init__(self, text_noun_list:list) -> None:
-        self.text_noun_list = text_noun_list
+class TextAnalysis():
+    def __init__(self, text:str) -> None:
+        self.text = text
+
 
     '''
-        - tf 점수 도출 (해당 원문 링크에서 키워드가 나타나는 총 횟수)
-        - param: keyword (찾고자 하는 키워드)
+        - mecab 형태소 분석기를 사용하여 명사 태깅된 키워드들을 추출하는 함수
+        
+        - param: divide_by_sentence 
+                 (optional: False => 원문 링크 기사 전체에 대한 키워드 추출, default: True => 문장 별 키워드 추출)
+                 단, 향후 데이터 수집 완료 후, 모든 문서에 대한 기준으로 클래스 실행 시,
+                 원문 기사 전체에 대한 키워드 추출로 바꿔서 모든 하위 함수에 적용 할 것. (divide_by_sentence==False)
+
+        - return: keyword_list
+                 (1차원 또는 2차원 리스트 return)
+    '''
+    def get_keywords(self, divide_by_sentence=True) -> list:
+        mecab = Mecab(dicpath=r"C:\mecab\mecab-ko-dic")
+
+        # 전체 text 키워드 추출
+        if divide_by_sentence == False:
+            text_pos_list = mecab.pos(self.text)
+            keyword_list = [i[0] for i in text_pos_list if i[1] == 'NNP' or i[1] == 'NNG']
+            return keyword_list
+        
+        # 문장별 text 키워드 추출
+        elif divide_by_sentence == True:
+            # 마지막 문장은 기자 정보임으로 제외
+            text_list = self.text.split('.')[:-2]
+            keyword_list = []
+
+            for text in text_list:
+                text_pos_list = mecab.pos(text)
+                keyword_sentence_list = [i[0] for i in text_pos_list if i[1] == 'NNP' or i[1] == 'NNG']
+                keyword_list.append(keyword_sentence_list)
+
+            return keyword_list
+
+        else:
+            return 'divide_by_sentence needs to be allocated only True or False!'
+
+
+    '''
+        - tdm metrix 도출 (해당 원문 링크에서 문장별로 키워드가 나타나는 횟수 도출)
+
+        - param: keywords(형태소 분석기로 돌린 키워드 리스트 => get_keywords(divide_by_sentence == True))
+                 단, 향후 데이터 수집 완료 후, 모든 문서에 대한 기준으로 클래스 실행 시,
+                 원문 기사 전체에 대한 키워드 추출로 바꿔서 해당 함수에 적용 할 것. (divide_by_sentence==False)
+
+        - return: tdm_df (문장 별 키워드 출현 빈도 수 데이터프레임)
+                  현재(한 문장에 하나의 행)
+                  향후(한 문서에 하나의 행)
+    '''
+    def get_tdm(self, keywords:list) -> pd.DataFrame:
+        
+        # 데이터 수집 완료 후 원문 데이터 돌릴 시 해당 코드 수정 필요
+        corpus = [(' ').join(keyword) for keyword in keywords]
+
+        vector = CountVectorizer()
+
+        tdm_array = vector.fit_transform(corpus).toarray()
+        tf_dic = vector.vocabulary_
+
+        tf_dic_sorted = dict(sorted(tf_dic.items(), key=lambda item: item[1]))
+        self.tdm_df = pd.DataFrame(tdm_array, columns=tf_dic_sorted.keys())
+        
+        return self.tdm_df
+
+
+    '''
+        - tf 점수 도출 (해당 원문 링크에서 키워드가 나타나는 총 횟수) aka BTF (basic term frequency)
+
+        - param: target (찾고자 하는 키워드)
+
         - return: tf (해당 키워드의 tf 점수)
-        - 이슈: return 을 모든 중복 제외한 키워드들과 이에 해당하는 tf 점수 딕셔너리로 줄지, 개별 단어에 대한 tf 점수 하나만 뱉어줄지 고민
     '''
-    def get_tf(self, keyword:str) -> int:
-        text_noun_count = {}
-        text_count = np.unique(self.text_noun_list, return_counts=True)
-
-        for noun, count in zip(*text_count):
-            text_noun_count[noun] = count
-
-        text_noun_count = sorted(text_noun_count.items(), key=lambda x: x[1], reverse=True)
-
-        # 특정 키워드의 tf 점수 탐색
+    def get_tf(self, target:str) -> int:
         try:
-            tf = [text_tf[1] for text_tf in text_noun_count if keyword == text_tf[0]][0]
-            return tf
+            return self.tdm_df[target].sum()
         except:
-            tf = 0
-            return tf
+            return 0
+
 
     '''
-        - tdm 점수 도출 (문서별로 단어의 빈도수를 계산하여 행렬로 만듦)
+        - ntf1 점수 도출 (해당 키워드의 btf 값 / 문서집합 내에서 출현한 모든 단어들의 btf 값 중 최댓값)
+        https://scienceon.kisti.re.kr/commons/util/originalView.do?cn=JAKO200910348031067&oCn=JAKO200910348031067&dbt=JAKO&journal=NJOU00294759
+
+        - param: target (찾고자 하는 키워드)
+
+        - return: ntf1 (해당 키워드의 ntf1 점수)
     '''
-    def get_tdm(self):
-        pass
+    def get_ntf1(self, target:str) -> float:
+        tdm_col = list(self.tdm_df.columns)
+
+        # 문서 집합 내에 출현한 모든 단어들의 btf 값 리스트
+        btf_list = []
+        for keyword in tdm_col:
+            btf_list.append((keyword, self.get_tf(keyword)))
+
+        # 해당 키워드의 btf 값
+        btf = [btf[1] for btf in btf_list if target == btf[0]][0]
+
+        # 문서집합 내에서 출현한 모든 단어들의 btf 값 중 최댓값
+        max_btf = max([btf[1] for btf in btf_list])
+
+        ntf1 = btf / max_btf
+
+        return ntf1
+
+    
+    '''
+        - ntf2 점수 도출 ((해당 단어의 문서에서의 발생 빈도 / 각 문서의 모든 단어에 대한 발생 빈도)의 합)
+
+        - param: target (찾고자 하는 키워드)
+
+        - return: ntf2 (해당 키워드의 ntf2 점수)
+    '''
+    def get_ntf2(self, target:str) -> int:
+        tdm_col = list(self.tdm_df.columns)
+        
+        # 해당 단어의 문서에서의 발생 빈도 리스트
+        target_tf = []
+        for idx in range(len(self.tdm_df)):
+            target_tf_list = []
+
+            for keyword in tdm_col:
+                # 해당 단어의 문서에서의 발생 빈도
+                if target == keyword:
+                    target_tf_list.append(self.tdm_df.loc[idx, keyword])
+
+            target_tf.extend(target_tf_list)
+
+        # 각 문서의 모든 단어에 대한 발생 빈도 리스트
+        all_tf = self.tdm_df.sum(axis=1).to_list()
+
+        # target_tf / all_tf
+        ntf2_list = np.array(target_tf) / np.array(all_tf)
+
+        ntf2 = ntf2_list.sum()
+
+        return ntf2
+        
+    
+    '''
+        - idf 점수 도출 (df의 역수 값)
+
+        - param: None
+
+        - return: idf (각 키워드들의 idf 점수)
+    '''
+    def get_idf(self) -> pd.Series:
+        num = len(self.tdm_df)
+        df = self.tdm_df.astype(bool).sum(axis=0)
+        idf = np.log((num + 1) / (df + 1)) + 1
+        
+        return idf
 
 
+    '''
+        - tf-idf 점수 도출, original tf 버전으로 적용된 것 (btf)
+
+        - param: idf (각 키워드들의 idf 점수)
+                 
+        - return: total_tf_idf (문장별 모든 키워드 각각의 tf-idf 점수 리스트, 2차원 리스트로 반환)
+    '''
+    def get_tf_idf(self, idf:pd.Series) -> pd.DataFrame:
+        try:
+            tf_idf = self.tdm_df * idf
+
+            # tf-idf 정규화
+            tf_idf = tf_idf / np.linalg.norm(tf_idf, axis=1, keepdims=True)
+
+            return tf_idf
+
+        except:
+            return 'idf must be a Series type'
+
+    
+    '''
+        - 문서별 해당 키워드에 대한 tf-idf 점수 도출
+          향후 수집 완료 후 사용자가 검색어 키워드 입력 시 문서 콘텐츠 별 tf-idf 점수 도출 => 연관도순 정렬 옵션으로 사용 가능
+
+        - param: target (찾고자 하는 키워드)
+                 tf_opt (default: tf, optional: ntf1, ntf2)
+                 normalize (default: False, optional: True)
+                 
+        - return: tf_idf (개별 문서의 해당 키워드에 대한 tf-idf 점수)
+    '''
+    def get_tf_idf2(self, target, tf_opt='tf', normalize=False) -> float:
+        # 특정 키워드에 대한 idf 도출
+        idf = self.get_idf().to_dict()
+        target_idf = idf.get(target)
+
+        tf = 0
+        if tf_opt == 'tf':
+            tf = self.get_tf(target)
+        elif tf_opt == 'ntf1':
+            tf = self.get_ntf1(target)
+        elif tf_opt == 'ntf2':
+            tf = self.get_ntf2(target)
+
+        if normalize == True:
+            tf = np.log(tf) + 1.0
+
+        tf_idf = tf * target_idf
+
+        return tf_idf
+
+    
 if __name__ == '__main__':
     sample_text = '''
                     '유엔 인권전문가 "형법으로 낙태 처벌하는 한국 우려" 유엔 인권이사회 산하 전문가들이 한국 정부의 낙태 처벌 관련 개정안에 우려를 표했다.
@@ -53,12 +233,38 @@ if __name__ == '__main__':
                     지난해 12월31일부로 효력을 상실했다. 이보배 한경닷컴 객원기자 newsinfo@hankyung.com ⓒ 한국경제 & , 무단전재 및 재배포 금지'
                 '''
     
-    mecab = Mecab(dicpath=r"C:\mecab\mecab-ko-dic")
+    text_analysis = TextAnalysis(sample_text)
+    # get_keywords test
+    keywords = text_analysis.get_keywords(divide_by_sentence=False)
+    # print(keywords)
 
-    text_pos_list = mecab.pos(sample_text)
-    text_noun_list = [i[0] for i in text_pos_list if i[1] == 'NNP' or i[1] == 'NNG']
+    keywords2 = text_analysis.get_keywords()
+    # print(keywords2)
 
-    text_score = TextScore(text_noun_list)
-    # tf test
-    tf = text_score.get_tf('인권')
-    print(tf)
+    # get_tdm test
+    tdm = text_analysis.get_tdm(keywords2)
+    # print(tdm)
+
+    # get_tf test
+    tf = text_analysis.get_tf('유엔')
+    # print(tf)
+
+    # get_idf test
+    idf = text_analysis.get_idf()
+    # print(idf)
+
+    # get_tf_idf test
+    tf_idf_df = text_analysis.get_tf_idf(idf)
+    # print(tf_idf_df)
+
+    # get_ntf1 test
+    ntf1 = text_analysis.get_ntf1('유엔')
+    # print(ntf1)
+
+    # get_ntf2 test
+    ntf2 = text_analysis.get_ntf2('유엔')
+    # print(ntf2)
+
+    # get_tf_idf2 test
+    tf_idf = text_analysis.get_tf_idf2('유엔', tf_opt='tf', normalize=True)
+    print(tf_idf)
