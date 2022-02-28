@@ -125,7 +125,7 @@ class TextScore():
 
         - return: ntf2 (해당 키워드의 ntf2 점수)
     '''
-    def get_ntf2(self, target:str) -> int:
+    def get_ntf2(self, target:str) -> float:
         tdm_col = list(self.tdm_df.columns)
         
         # 해당 단어의 문서에서의 발생 빈도 리스트
@@ -196,7 +196,7 @@ class TextScore():
                  
         - return: tf_idf (전체 또는 단일 문서에서 해당 키워드에 대한 tf-idf 점수)
     '''
-    def get_tf_idf2(self, target, tf_opt='tf', normalize=False):
+    def get_tf_idf2(self, target, tf_opt='tf', normalize=False) -> float:
         # 특정 키워드에 대한 idf 도출
         idf = self.get_idf().to_dict()
         target_idf = idf.get(target)
