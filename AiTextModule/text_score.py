@@ -218,7 +218,7 @@ class TextScore():
 
 
 '''
-        - 주어진 키워드(검색어)에 대하여 전체 또는 개별 문서에 대한 텍스트 점수 도출
+        - 주어진 키워드(검색어)에 대하여 전체 또는 개별 문서에 대한 텍스트 점수 딕셔너리 도출
 
         - param: text_list (텍스트 리스트, 제목 + 본문),
                  keyword (찾고자 하는 키워드 또는 검색어),
@@ -226,7 +226,7 @@ class TextScore():
                  tf_opt (default: tf, optional: ntf1, ntf2),
                  normalize (default: False, optional: True)
                  
-        - return: tf_idf (전체 또는 단일 문서에서 해당 키워드에 대한 tf-idf 점수)
+        - return: text_score_dict (전체 또는 단일 문서에서 해당 키워드에 대한 텍스트 점수 딕셔너리)
     '''
 def get_text_score(text_list:list, keyword:str, scale_opt='all', tf_opt='tf', normalize=False) -> dict:
     text_score_dict = {}
