@@ -10,34 +10,35 @@ warnings.filterwarnings('ignore')
 
 '''
     - 주어진 텍스트에 관련 점수를 도출하는 클래스
-    - param: text (전처리 모듈에서 전처리를 수행한 (제목 + 본문 text), 마지막 문장에서 기자 소개하는 문장은 제거 요청, 마지막 마침표도 제거)
+    - param: None
 '''
 class TextScore():
-    def __init__(self, text:str) -> None:
-        self.text = text
+    def __init__(self) -> None:
+        pass
 
 
     '''
         - mecab 형태소 분석기를 사용하여 명사 태깅된 키워드들을 추출하는 함수
         
-        - param: divide_by_sentence 
+        - param: text (전처리 모듈에서 전처리를 수행한 (제목 + 본문 text), 마지막 문장에서 기자 소개하는 문장은 제거 요청, 마지막 마침표도 제거)
+                 divide_by_sentence 
                  (default: False => 원문 링크 기사 전체에 대한 키워드 추출, optional: True => 문장 별 키워드 추출)
 
         - return: keyword_list
                  (1차원 또는 2차원 리스트 return)
     '''
-    def get_keywords(self, divide_by_sentence=False) -> list:
+    def get_keywords(self, text:str, divide_by_sentence=False) -> list:
         mecab = Mecab(dicpath=r"C:\mecab\mecab-ko-dic")
 
         # 전체 text 키워드 추출
         if divide_by_sentence == False:
-            text_pos_list = mecab.pos(self.text)
+            text_pos_list = mecab.pos(text)
             keyword_list = [i[0] for i in text_pos_list if i[1] == 'NNP' or i[1] == 'NNG']
             return keyword_list
         
         # 문장별 text 키워드 추출
         elif divide_by_sentence == True:
-            text_list = self.text.split('.')
+            text_list = text.split('.')
             keyword_list = []
 
             for text in text_list:
@@ -234,8 +235,8 @@ def get_text_score(text_list:list, keyword:str, scale_opt='all', tf_opt='tf', no
     if scale_opt == 'all':
         keywords_list = []
         for text in text_list:
-            text_score = TextScore(text)
-            keywords_list.append(text_score.get_keywords())
+            text_score = TextScore()
+            keywords_list.append(text_score.get_keywords(text))
 
         # tdm_df 객체 생성
         text_score.get_tdm(keywords_list)
@@ -251,8 +252,8 @@ def get_text_score(text_list:list, keyword:str, scale_opt='all', tf_opt='tf', no
     elif scale_opt == 'by_doc':
         keywords_list = []
         for text in text_list:
-            text_score = TextScore(text)
-            keywords_list.append(text_score.get_keywords(divide_by_sentence=True))
+            text_score = TextScore()
+            keywords_list.append(text_score.get_keywords(text, divide_by_sentence=True))
 
         for idx, keywords in enumerate(keywords_list):
             single_text_score_dict = {}
