@@ -12,7 +12,7 @@ public class UserRepository implements IUserRepository {
 
 	@Override
 	public int test() {
-		String sql = "SELECT COUNT(*) FROM EMPLOYEES";
+		String sql = "SELECT COUNT(*) FROM NEWS";
 		return jdbcTemplate.queryForObject(sql, Integer.class);
 	}
 
