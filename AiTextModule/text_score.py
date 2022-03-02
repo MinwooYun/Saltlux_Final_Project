@@ -109,14 +109,21 @@ class TextScore():
             btf_list.append((keyword, self.get_tf(keyword)))
 
         # 해당 키워드의 btf 값
-        btf = [btf[1] for btf in btf_list if target == btf[0]][0]
+        try:
+            btf = [btf[1] for btf in btf_list if target == btf[0]][0]
 
-        # 문서집합 내에서 출현한 모든 단어들의 btf 값 중 최댓값
-        max_btf = max([btf[1] for btf in btf_list])
+            # 문서집합 내에서 출현한 모든 단어들의 btf 값 중 최댓값
+            max_btf = max([btf[1] for btf in btf_list])
 
-        ntf1 = btf / max_btf
+            ntf1 = btf / max_btf
 
-        return ntf1
+            return ntf1
+
+        # 해당 키워드가 없을 경우
+        except:
+            ntf1 = 0
+
+            return ntf1
 
     
     '''
@@ -130,26 +137,33 @@ class TextScore():
         tdm_col = list(self.tdm_df.columns)
         
         # 해당 단어의 문서에서의 발생 빈도 리스트
-        target_tf = []
-        for idx in range(len(self.tdm_df)):
-            target_tf_list = []
+        try:
+            target_tf = []
+            for idx in range(len(self.tdm_df)):
+                target_tf_list = []
 
-            for keyword in tdm_col:
-                # 해당 단어의 문서에서의 발생 빈도
-                if target == keyword:
-                    target_tf_list.append(self.tdm_df.loc[idx, keyword])
+                for keyword in tdm_col:
+                    # 해당 단어의 문서에서의 발생 빈도
+                    if target == keyword:
+                        target_tf_list.append(self.tdm_df.loc[idx, keyword])
 
-            target_tf.extend(target_tf_list)
+                target_tf.extend(target_tf_list)
 
-        # 각 문서의 모든 단어에 대한 발생 빈도 리스트
-        all_tf = self.tdm_df.sum(axis=1).to_list()
+            # 각 문서의 모든 단어에 대한 발생 빈도 리스트
+            all_tf = self.tdm_df.sum(axis=1).to_list()
 
-        # target_tf / all_tf
-        ntf2_list = np.array(target_tf) / np.array(all_tf)
+            # target_tf / all_tf
+            ntf2_list = np.array(target_tf) / np.array(all_tf)
 
-        ntf2 = ntf2_list.sum()
+            ntf2 = ntf2_list.sum()
 
-        return ntf2
+            return ntf2
+
+        # 해당 키워드가 없을 경우
+        except:
+            ntf2 = 0
+
+            return ntf2
         
     
     '''
@@ -198,24 +212,31 @@ class TextScore():
         - return: tf_idf (전체 또는 단일 문서에서 해당 키워드에 대한 tf-idf 점수)
     '''
     def get_tf_idf2(self, target, tf_opt='tf', normalize=False) -> float:
-        # 특정 키워드에 대한 idf 도출
-        idf = self.get_idf().to_dict()
-        target_idf = idf.get(target)
+        try:
+            # 특정 키워드에 대한 idf 도출
+            idf = self.get_idf().to_dict()
+            target_idf = idf.get(target)
 
-        tf = 0
-        if tf_opt == 'tf':
-            tf = self.get_tf(target)
-        elif tf_opt == 'ntf1':
-            tf = self.get_ntf1(target)
-        elif tf_opt == 'ntf2':
-            tf = self.get_ntf2(target)
+            tf = 0
+            if tf_opt == 'tf':
+                tf = self.get_tf(target)
+            elif tf_opt == 'ntf1':
+                tf = self.get_ntf1(target)
+            elif tf_opt == 'ntf2':
+                tf = self.get_ntf2(target)
 
-        if normalize == True:
-            tf = np.log(tf) + 1.0
+            if normalize == True:
+                tf = np.log(tf) + 1.0
 
-        tf_idf = tf * target_idf
+            tf_idf = tf * target_idf
 
-        return tf_idf
+            return tf_idf
+
+        # 해당 키워드가 없을 경우
+        except:
+            tf_idf = 0
+
+            return tf_idf
 
 
 '''
@@ -271,6 +292,25 @@ def get_text_score(text_list:list, keyword:str, scale_opt='all', tf_opt='tf', no
 
         return text_score_dict
 
+
+def transform_to_csv(df):
+    # text_list
+    df['td'] = df['title'] + ' ' + df['detail']
+    td_list = df['td'].to_list()
+    td_list = [td.strip('.') for td in td_list]
+
+    # keyword
+    keyword_list = df['nouns'].to_list()
+    keyword_list = [list(set(keyword.split(' '))) for keyword in keyword_list]
+
+    text_score_list = []
+    for td, keywords in zip(td_list, keyword_list):
+        for keyword in keywords:
+            text_score_dic = get_text_score([td], keyword, scale_opt='by_doc', tf_opt='ntf2')
+            text_score_list.append(text_score_dic)
+
+    print(text_score_list[0])
+
     
 if __name__ == '__main__':
     sample_text_list = ['''
@@ -296,7 +336,7 @@ if __name__ == '__main__':
                 ]
 
     total_text_score = get_text_score(sample_text_list, '강조', tf_opt='ntf2', normalize=True)
-    print(total_text_score)
+    # print(total_text_score)
 
     '''
         - 문서 즉 기사 원문 링크 별 tf-idf 점수를 도출하여
@@ -304,5 +344,8 @@ if __name__ == '__main__':
         - get_keywords(divide_by_sentence=True) 로 주어
         - 기사 원문 하나 당 문장 별로 이루어진 tdm으로 tf-idf 분석이 올바르다고 생각함.
     '''
-    single_text_score = get_text_score(sample_text_list, '강조', scale_opt='by_doc', tf_opt='ntf2', normalize=True)
-    print(single_text_score)
+    single_text_score = get_text_score(sample_text_list, '강조', scale_opt='by_doc', tf_opt='ntf2')
+    # print(single_text_score)
+
+    df = pd.read_csv('sample_elastic.csv', index_col=0)
+    # transform_to_csv(df)
