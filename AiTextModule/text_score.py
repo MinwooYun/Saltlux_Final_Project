@@ -253,6 +253,10 @@ class TextScore():
 def get_text_score(text_list:list, keyword:str, scale_opt='all', tf_opt='tf', normalize=False) -> dict:
     text_score_dict = {}
     
+    # 1. text_list 가 두 개 이상의 원문으로 들어갔을 때,
+    # 전체 N개의 원문에서 해당 키워드의 점수 도출
+    # 2. text_list 가 하나의 원문만 들어갔을 때,
+    # 하나의 원문에 대한 해당 키워드 점수 도출
     if scale_opt == 'all':
         keywords_list = []
         for text in text_list:
@@ -270,6 +274,10 @@ def get_text_score(text_list:list, keyword:str, scale_opt='all', tf_opt='tf', no
 
         return text_score_dict
 
+    # # 1. text_list 가 두 개 이상의 원문으로 들어갔을 때,
+    # 전체 N개의 원문에서 각 원문에 해당하는 키워드의 점수 도출
+    # 2. text_list 가 하나의 원문만 들어갔을 때,
+    # 하나의 원문에서 각 문장에 대한 해당 키워드 점수 도출
     elif scale_opt == 'by_doc':
         keywords_list = []
         for text in text_list:
@@ -293,23 +301,67 @@ def get_text_score(text_list:list, keyword:str, scale_opt='all', tf_opt='tf', no
         return text_score_dict
 
 
-def transform_to_csv(df):
+'''
+        - 분석용 전처리 데이터를 score table 데이터 (키워드, 문서번호, tf, ntf1, ntf2, tf-idf)로 변환하는 함수
+
+        - param: df (분석용 전처리 데이터 => 문서번호, td (text + ' ' + detail), nouns (출현빈도 순서로 중복을 허용한 명사 리스트))
+                 
+        - return: score_df
+
+        - issue: 현재 함수에서는 하나의 원문을 기준으로 text_score 클래스를 시행하기 때문에,
+                 get_text_score의 scale_opt='all'로 지정
+    '''
+def transform_to_csv(df:pd.DataFrame) -> pd.DataFrame:
     # text_list
     df['td'] = df['title'] + ' ' + df['detail']
     td_list = df['td'].to_list()
     td_list = [td.strip('.') for td in td_list]
+    td_dic = {td:idx for idx, td in enumerate(td_list)}
 
     # keyword
     keyword_list = df['nouns'].to_list()
     keyword_list = [list(set(keyword.split(' '))) for keyword in keyword_list]
 
-    text_score_list = []
-    for td, keywords in zip(td_list, keyword_list):
-        for keyword in keywords:
-            text_score_dic = get_text_score([td], keyword, scale_opt='by_doc', tf_opt='ntf2')
-            text_score_list.append(text_score_dic)
+    # score_df value list
+    ids = []
+    words = []
+    tf = []
+    ntf1 = []
+    ntf2 = []
+    tf_idf = []
 
-    print(text_score_list[0])
+    for td, keywords in zip(td_list, keyword_list):
+        # 문서 번호
+        id = td_dic.get(td)
+
+        # 해당 문서에 등장한 명사들의 모음 (중복제거)
+        # 각 명사(키워드)가 속한 해당 문서의 점수 도출
+        for keyword in keywords:
+            text_score_dic = get_text_score([td], keyword, tf_opt='ntf2')
+
+            # 데이터프레임 리스트에 추가
+            ids.append(id)
+            words.append(keyword)
+            tf.append(text_score_dic['tf'])
+            ntf1.append(text_score_dic['ntf1'])
+            ntf2.append(text_score_dic['ntf2'])
+            tf_idf.append(text_score_dic['tf-idf'])
+
+            print(id, keyword, text_score_dic)
+
+    # score_df 생성
+    score_df = pd.DataFrame(
+        {
+            'id': ids,
+            'keyword': words,
+            'tf': tf,
+            'ntf1': ntf1,
+            'ntf2': ntf2,
+            'tf-idf': tf_idf
+        }
+    )
+
+    return score_df
 
     
 if __name__ == '__main__':
@@ -335,7 +387,7 @@ if __name__ == '__main__':
                 '''
                 ]
 
-    total_text_score = get_text_score(sample_text_list, '강조', tf_opt='ntf2', normalize=True)
+    # total_text_score = get_text_score(sample_text_list, '강조', tf_opt='ntf2', normalize=True)
     # print(total_text_score)
 
     '''
@@ -344,8 +396,10 @@ if __name__ == '__main__':
         - get_keywords(divide_by_sentence=True) 로 주어
         - 기사 원문 하나 당 문장 별로 이루어진 tdm으로 tf-idf 분석이 올바르다고 생각함.
     '''
-    single_text_score = get_text_score(sample_text_list, '강조', scale_opt='by_doc', tf_opt='ntf2')
+    # single_text_score = get_text_score(sample_text_list, '강조', scale_opt='by_doc', tf_opt='ntf2')
     # print(single_text_score)
 
-    df = pd.read_csv('sample_elastic.csv', index_col=0)
-    # transform_to_csv(df)
+    df = pd.read_csv('sample_elastic.csv', index_col=0)[:50]
+    # print(df)
+    score_df = transform_to_csv(df)
+    score_df.to_csv('sample_elastic_score.csv', encoding='utf-8-sig', index=False)
