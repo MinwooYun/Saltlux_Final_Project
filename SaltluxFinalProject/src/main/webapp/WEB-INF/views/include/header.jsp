@@ -19,8 +19,8 @@
 	<script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 	
 	<!-- Material Icons -->
-	<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-	
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">	
+
 	<!-- CSS Files -->
 	<link id="pagestyle" href="resources/assets/css/material-kit.css?v=3.0.0" rel="stylesheet" />
 	
@@ -38,7 +38,7 @@
 	
 </head>
 <!-- Navbar -->
-	<div class="container position-sticky z-index-sticky top-0">
+	<div class="container position-sticky z-index-sticky">
 		<div class="row">
 			<div class="col-12">
 				<nav class="navbar navbar-expand-lg  blur border-radius-xl top-0 z-index-fixed shadow position-absolute my-3 py-2 start-0 end-0 mx-4">
