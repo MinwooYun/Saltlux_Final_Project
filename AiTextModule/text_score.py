@@ -311,7 +311,7 @@ def get_text_score(text_list:list, keyword:str, scale_opt='all', tf_opt='tf', no
         - issue: 현재 함수에서는 하나의 원문을 기준으로 text_score 클래스를 시행하기 때문에,
                  get_text_score의 scale_opt='all'로 지정
     '''
-def transform_to_csv(df:pd.DataFrame) -> pd.DataFrame:
+def get_score_df(df:pd.DataFrame) -> pd.DataFrame:
     # text_list
     df['td'] = df['title'] + ' ' + df['detail']
     td_list = df['td'].to_list()
@@ -401,5 +401,5 @@ if __name__ == '__main__':
 
     df = pd.read_csv('sample_elastic.csv', index_col=0)[:50]
     # print(df)
-    score_df = transform_to_csv(df)
+    score_df = get_score_df(df)
     score_df.to_csv('sample_elastic_score.csv', encoding='utf-8-sig', index=False)
