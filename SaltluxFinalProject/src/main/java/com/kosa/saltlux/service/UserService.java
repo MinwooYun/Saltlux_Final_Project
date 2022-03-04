@@ -2,26 +2,31 @@ package com.kosa.saltlux.service;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kosa.saltlux.repository.IUserRepository;
+import com.kosa.saltlux.vo.Criteria;
+import com.kosa.saltlux.vo.newsVO;
 import com.kosa.saltlux.vo.testVO;
 
 @Service
 public class UserService implements IUserService {
 	
-	@Autowired
-	IUserRepository userRepository;
+	@Inject
+	private IUserRepository mapper;
 	
 	@Override
-	public int test() {
-		return userRepository.test();
+	public int getPageTotal() {
+		return mapper.getPageTotal();
 	}
 
+
 	@Override
-	public List<testVO> getTest() {
-		return userRepository.getTest();
+	public List<newsVO> getNews(Criteria cri) {
+		return mapper.getNews(cri);
 	}
 
 }

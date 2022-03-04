@@ -26,5 +26,11 @@
 		class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-		
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mapperLocations" value="classpath:com/kosa/saltlux/**/*.xml"/>
+	</bean>
+	
+	<mybatis-spring:scan base-package="com/kosa/saltlux/repository"/>
 </beans>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kosa.saltlux.repository.IUserRepository">
+	<resultMap type="com.kosa.saltlux.vo.newsVO" id="newsMap">
+		<result column="NEWS_NO" property="newsNo" />
+		<result column="TITLE" property="title" />
+		<result column="CONTENTS" property="contents" />
+		<result column="IMAGE_URL" property="imageURL" />
+		<result column="THUMBNAIL_URL" property="thumbnailURL" />
+		<result column="PRESS" property="press" />
+		<result column="CATEGORYA" property="category" />
+		<result column="NEWS_DATE" property="newsDate" />
+		<result column="NOUNS" property="nouns" />
+	</resultMap>
+	
+	<select id="getPageTotal" resultType="int">
+		SELECT COUNT(*) FROM Luxian.NEWS;
+	</select>
+	
+	<select id="getNews" resultType="com.kosa.saltlux.vo.newsVO">
+		SELECT * FROM Luxian.NEWS;
+	</select>
+
+</mapper>

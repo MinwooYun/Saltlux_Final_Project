@@ -38,6 +38,26 @@
 		float : left;
 		align : absbottom;
 	}
+	.contentTitle {
+		font-style: italic ; 
+		font-weight: bold; 
+		font-size: 1.5em;
+		line-height: 1.0em; 
+		color: navy;
+		font-family: arial;
+	}
+	.pageInfo{
+	  	list-style : none;
+	  	display: inline-block;
+	    margin: 50px 0 0 100px;  	
+  	}
+	.pageInfo li{
+		float: left;
+		font-size: 20px;
+		margin-left: 18px;
+		padding: 7px;
+		font-weight: 500;
+	}
 </style>
 </head>
 <body>
@@ -55,7 +75,7 @@
 						    <div class="input-group input-group-dynamic mb-4">
 							    <form action="/results" method="GET" enctype="multipart/form-data">
 						      		<span class="input-group-text"><i class="fas fa-search" aria-hidden="true"></i></span>
-						      		<input class="form-control" id="search" name="search" placeholder="Search" type="text">
+						      		<input class="form-control" id="search" name="search" value="${search}" placeholder="Search" type="text">
 						      	</form>
 						    </div>
 						  </div>
@@ -67,15 +87,47 @@
 				<div class="newsContents">
 					<c:forEach var="test" items="${testList}">
 						<div class="newsContentsList" style="border:1px solid red;">
-							<img class="thumbnail" src="https://img1.daumcdn.net/thumb/S95x77ht.u/?fname=https%3A%2F%2Ft1.daumcdn.net%2Fnews%2F202103%2F01%2Fsportalkr%2F20210301234842723khxl.jpg&scode=media">
+							<img class="thumbnail" src="${test.thumbnailURL}">
 							<br>
-							<p>${test.productName}</p>
+							<p class="contentTitle">${test.title}</p>
 							<br>
-							<p>${test.productCategoryName}</p>
+							<p>${test.category}</p>
 							<br>
 						</div>
 					</c:forEach>
 				</div>
+				
+				<!-- 페이징 -->
+				<div class="row justify-space-between py-2" >
+			        <div class="col-lg-4 mx-auto">
+			        	<ul class="pagination pagination-primary m-4">
+			        		<!-- 이전페이지 버튼 -->
+			        		<c:if test="${pageMaker.prev}">
+			                    <li class="page-item"><a class="material-icons" href="${pageMaker.startPage-1}">Previous</a></li>
+			                </c:if>
+			                
+			                 <!-- 각 번호 페이지 버튼 -->
+			                <c:forEach var="num" begin="${pageMaker.startPage}" end="${pageMaker.endPage}">
+			                    <li class="page-item ${pageMaker.cri.pageNum == num ? "active":"" }"><a class="page-link" href="localhost:8080/result?search=${search}&page=${num}">${num}</a></li>
+			                </c:forEach>
+			                
+			                <!-- 다음페이지 버튼 -->
+			                <c:if test="${pageMaker.next}">
+			                    <li class="page-item"><a class="material-icons" href="${pageMaker.endPage + 1 }">Next</a></li>
+			                </c:if> 
+		                </ul>
+			        </div>
+			    </div>
+
+				<form id="moveForm" method="get">	
+					<input type="hidden" name="pageNum" value="${pageMaker.cri.pageNum }">
+					<input type="hidden" name="amount" value="${pageMaker.cri.amount }">
+					<input type="hidden" name="keyword" value="${pageMaker.cri.keyword }">	
+					<input type="hidden" name="type" value="${pageMaker.cri.type }">	
+				</form>
+				<!-- /페이징 -->
+				
+				
 			</div>
 			<div style="height:500px; width:20%; border:1px solid green; float:right;">
 			</div>
@@ -83,5 +135,18 @@
 		
 	</div>
 	<jsp:include page="../views/include/footer.jsp"></jsp:include>
+	
+<script>
+$(document).ready(function(){
+	$(".pagination a").on("click", function(e){
+		e.preventDefault();
+		moveForm.find("input[name='pageNum']").val($(this).attr("href"));
+		moveForm.attr("action", "/results");
+		moveForm.submit();
+		
+	});	
+});
+</script>
+
 </body>
 </html>

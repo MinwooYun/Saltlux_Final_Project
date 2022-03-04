@@ -13,6 +13,17 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/results', methods=['GET'])
+def get_results():
+    print(request.method)
+
+    data = request.args.get('search')
+    print(data)
+
+    response = make_response(jsonify(data))
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+
 @app.route('/test_img', methods=['POST'])
 def rest_img_test():
     param = request.form.get('data')
