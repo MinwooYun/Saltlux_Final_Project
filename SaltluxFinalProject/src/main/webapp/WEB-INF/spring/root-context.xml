@@ -32,5 +32,13 @@
 		<property name="mapperLocations" value="classpath:com/kosa/saltlux/**/*.xml"/>
 	</bean>
 	
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<property name="order" value="0"/>
+	</bean>
+	    
+	<bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+		<property name="contentType" value="application/json;charset=UTF-8"> </property>
+	</bean>
+	
 	<mybatis-spring:scan base-package="com/kosa/saltlux/repository"/>
 </beans>
