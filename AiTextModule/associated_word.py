@@ -74,7 +74,7 @@ class AssociatedWords():
 
         - return: co_occurrence_words (해당 키워드에 대한 문서 내 (연관 단어, 점수) 리스트)
     '''
-    def get_co_occurrence_words(self, keyword_list:list, top_size=5) -> list:
+    def get_co_occurrence_words(self, keyword_list:list, top_size) -> list:
 
         related_keywords_list = []
         # 한 키워드에 대한 연관검색어 리스트 생성
@@ -119,13 +119,13 @@ class AssociatedWords():
         return co_occurrence_words
 
 
-def get_total_co_occurrence(doc_info_list:list, search_text_list:list, top_size=5) -> dict:
+def get_total_co_occurrence(doc_info_list:list, search_text_list:list, word_top_size=5, top_size=5) -> dict:
     related_words_list = []
     # 개별 문서에 대한 연관어 및 해당 동반출현빈도 점수 도출
     for doc_info in doc_info_list:
         associated_word = AssociatedWords(doc_info['nouns'], doc_info['bm25'])
         associated_word.get_co_occurrence_matrix()
-        related_words = associated_word.get_co_occurrence_words(search_text_list)
+        related_words = associated_word.get_co_occurrence_words(search_text_list, top_size=word_top_size)
         related_words_list.append(related_words)
 
     # 문서 별 연관단어 2차원 리스트 1차원 변환
@@ -223,5 +223,5 @@ if __name__ == '__main__':
         }
     ]
 
-    sample_co_words = get_total_co_occurrence(sample_doc_info, sample_search_text_list, top_size=7)
+    sample_co_words = get_total_co_occurrence(sample_doc_info, sample_search_text_list, word_top_size=5, top_size=4)
     print(sample_co_words)
