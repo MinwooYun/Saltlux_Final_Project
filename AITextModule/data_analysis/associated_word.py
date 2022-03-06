@@ -6,7 +6,10 @@ from collections import Counter
 
 from itertools import islice
 
-from keyword_preprocess import get_preprocessed_keyword
+import sys
+[sys.path.append(i) for i in ['.', '..']]
+
+from data_preprocess.keyword_preprocess import get_preprocessed_keyword
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -149,22 +152,6 @@ def get_total_co_occurrence(doc_info_list:list, search_text_list:list, word_top_
 
 
 if __name__ == '__main__':
-    sample_noun_list = [
-                            '유엔', '인권', '전문가', '형법', '낙태', '처벌', '한국', '우려', '유엔', 
-                            '인권', '사회', '산하', '전문가', '한국', '정부', '낙태', '처벌', '관련', 
-                            '개정안', '우려', '여성', '차별', '실무', '위원회', '건강', '특별', '관', 
-                            '여성', '폭력', '특별', '관은', '현지', '시간', '낙태', '규제', '형법', 
-                            '계속', '사용', '점', '우려', '여성', '임신', '형사', '처벌', '상기', 
-                            '국제', '인권', '규범', '임신', '중절', '범죄', '필요', '조처', '합법', 
-                            '안전', '낙태', '서비스', '접근권', '보장', '조처', '촉구', '강조', '합법', 
-                            '임신', '절', '접근', '대기', '기간', '의무', '상담', '의료', '필요', '근거', 
-                            '차별', '장애물', '제거', '권고', '헌법', '재판소', '낙태죄', '헌법', '합치', 
-                            '결정', '현행', '형법', '지난해', '개정', '주문', '정부', '지난해', '임신', '이내', 
-                            '낙태', '허용', '내용', '형법', '모자', '보건', '법', '개정안', '발의', '국회', 
-                            '계류', '법률', '미비', '낙태', '형사', '처벌', '규정', '형법', '조항', '지난해', 
-                            '일부', '효력', '상실', '이보배', '한경', '닷컴', '객원', '기자', '한국', '경제', 
-                            '무단', '전재', '배포', '금지'
-                    ]
 
     '''
         - 사용자가 검색한 단어 명사 품사 태깅
@@ -174,8 +161,9 @@ if __name__ == '__main__':
          3. 받은 nouns 필드 결과 값들을 바탕으로 연관어분석 시행하여 해당 연관어의 출현빈도 점수와 함께 자바에 다시 전달
     '''
     # 사용자가 검색한 단어 명사 품사 태깅, 자바에 다시 전달
-    sample_search_text = '서비스를 보장하자'
+    sample_search_text = '낙태에 대한 범죄 인식'
     sample_search_text_list = get_preprocessed_keyword(sample_search_text)
+    print(sample_search_text_list)
 
     # 자바에서 해당 모듈에 건네줘야 할 데이터 양식
     sample_doc_info = [
@@ -223,5 +211,12 @@ if __name__ == '__main__':
         }
     ]
 
-    sample_co_words = get_total_co_occurrence(sample_doc_info, sample_search_text_list, word_top_size=5, top_size=4)
+    from time import time
+    begin = time()
+
+    sample_co_words = get_total_co_occurrence(sample_doc_info, sample_search_text_list, word_top_size=5, top_size=5)
     print(sample_co_words)
+
+    end = time()
+
+    print(end-begin)
