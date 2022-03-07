@@ -27,11 +27,15 @@ class TextScore():
         # 문서집합 내에서 출현한 모든 단어들의 btf 값 중 최댓값
         self.max_btf = max(self.btf_dict.values())
 
+        print('check 3')
+
         # 개별 문서에 대한 키워드 빈도 수 담아낸 딕셔너리
         self.ntf2_list = [dict(Counter(keyword)) for keyword in keyword_list]
 
         # 각 문서의 모든 단어에 대한 발생 빈도
         self.all_tf_list = [sum(tf_dic.values()) for tf_dic in self.ntf2_list]
+
+        print('check 4')
 
 
     '''
@@ -114,37 +118,51 @@ def normalize_tf(tf):
 
 
 def get_score_df(df:pd.DataFrame) -> pd.DataFrame:
+    date_list = df['news_date'].to_list()
     noun_list = df['nouns'].to_list()
 
+    print('check 1')
+
     # 각 문서에서 출현한 순서대로 나열된 명사 리스트 (중복 허용)
-    keyword_list = [keyword.split(' ') for keyword in noun_list]
+    keyword_list = [keyword.split(' ') for keyword in noun_list if type(keyword) == str]
 
-    # 각 문서에 존재하는 명사 리스트 (중복 허용 x)
-    target_keyword_list = [list(set(keyword)) for keyword in keyword_list]
+    # date와 해당 date 출현 명사들 매핑
+    date_keyword_list = []
+    for date_keywords in list(zip(date_list, keyword_list)):
+        # date에서 초, 분 단위는 제거
+        date = date_keywords[0][:-6]
+        keywords = date_keywords[1]
+        date_keyword_by_doc = [(str(date), keyword) for keyword in keywords]
+        date_keyword_list.append(date_keyword_by_doc)
 
-    # 전체 문서 단위에서 등장하는 고유 키워드들 => btf, ntf1 에 적용 가능
-    # for 문 제거 통한 속도 개선, 차피 btf, ntf1은 같은 키워드에 대하여 문서별로 다 같음
-    target_keyword_list = list(set(sum(target_keyword_list, [])))
+    print('check 2')
 
+    # 각 날짜마다 존재하는 명사 리스트 (중복 허용 x)
+    target_date_keyword_list = list(set(sum(date_keyword_list, [])))
+    target_date_keyword_list = list(set(target_date_keyword_list))
+
+    # textscore 클래스 객체 생성
     text_score = TextScore(keyword_list)
 
-    # 데이터프레임에 들어갈 리스트 목록
-    id = []; keyword = []; btf = []; ntf1 = []; ntf2 = []; idf = []; tf_idf = []
+    print('check 5')
 
-    # #각 문서에 존재하는 명사들에 대하여 점수 도출 시행
-    # for idx, target_keywords in enumerate(target_keyword_list):
+    # 데이터프레임에 들어갈 리스트 목록
+    date = []; keyword = []; btf = []; ntf1 = []; ntf2 = []; idf = []; tf_idf = []
 
     # 전체 문서에 대하여 탐색 키워드들의 점수 도출
-    for target_keyword in target_keyword_list:
+    for date_keyword in target_date_keyword_list:
+        date_time = date_keyword[0]
+        target_keyword = date_keyword[1]
+
         btf_score = text_score.get_btf(target_keyword)
         ntf1_score = text_score.get_ntf1()
         ntf2_score = text_score.get_ntf2(target_keyword)
         # idf_score = text_score.get_idf(target_keyword)
         # tf_idf_score = np.round((ntf1_score * idf_score), 3)
 
-        print(target_keyword, btf_score, ntf1_score, ntf2_score)
+        print(date_time, target_keyword, btf_score, ntf1_score, ntf2_score)
 
-        # id.append(idx)
+        date.append(date_time)
         keyword.append(target_keyword)
         btf.append(btf_score)
         ntf1.append(ntf1_score)
@@ -155,6 +173,7 @@ def get_score_df(df:pd.DataFrame) -> pd.DataFrame:
     # score_df 생성
     score_df = pd.DataFrame(
         {
+            'date': date,
             'keyword': keyword,
             'btf': btf,
             'ntf1': ntf1,
@@ -170,9 +189,11 @@ def get_score_df(df:pd.DataFrame) -> pd.DataFrame:
 if __name__ == '__main__':
     from time import time
     begin = time()
-    df = pd.read_csv('sample_elastic.csv', index_col=0)
+
+    df = pd.read_csv(r'csv_files\20210930preprocessed_data.csv', index_col=0)[:3]
     score_df = get_score_df(df)
-    print(score_df[score_df['keyword'] == '서건창'])
+    print(score_df)
+
     end = time()
 
     print(end-begin)
