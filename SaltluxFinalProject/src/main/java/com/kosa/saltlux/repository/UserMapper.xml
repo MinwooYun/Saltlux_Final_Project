@@ -14,11 +14,26 @@
 	</resultMap>
 	
 	<select id="getPageTotal" resultType="int">
-		SELECT COUNT(*) FROM Luxian.NEWS;
+		SELECT COUNT(*) FROM luxian.NEWS;
 	</select>
 	
 	<select id="getNews" resultType="com.kosa.saltlux.vo.newsVO">
-		SELECT * FROM Luxian.NEWS;
+		SELECT * FROM luxian.NEWS
+		limit 10;
+	</select>
+	
+	<select id="getDB" resultType="com.kosa.saltlux.vo.newsVO">
+		SELECT NEWS_NO AS newsNo,
+			   TITLE AS title,
+			   CONTENTS AS contents,
+			   IMAGE_URL AS imageURL,
+			   THUMBNAIL_URL AS thumbnailURL,
+			   PRESS AS press,
+			   CATEGORY AS category,
+			   NEWS_DATE AS newsDate,
+			   NOUNS AS nouns
+		FROM luxian.NEWS
+		limit #{cnt}, 10;
 	</select>
 
 </mapper>

@@ -11,4 +11,7 @@ public interface IUserService {
 	
 //	모든 뉴스데이터 가져오기
 	List<newsVO> getNews(Criteria cri);
+	
+//	mariaDB 데이터 조회
+	List<newsVO> getDB(int cnt);
 }

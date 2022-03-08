@@ -5,14 +5,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -27,6 +35,8 @@ public class UserController {
 	
 	@Autowired
 	IUserService userService;
+	
+	public static final String version = "api/v1";
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
@@ -45,8 +55,9 @@ public class UserController {
 	@RequestMapping("/results")
 	public String testRestRequest(Model model, String search, Criteria cri) {
 		try {
+			System.out.println(search);
 			String keyword = search.replace(" ", "-");
-			String reqUrl = "http://127.0.0.1:5000/results?search=" + keyword;
+			String reqUrl = "http://127.0.0.1:5000/results?search=" + URLEncoder.encode(keyword, "UTF-8");
 			URL url = new URL(reqUrl);
 			HttpURLConnection con = (HttpURLConnection)url.openConnection();
 			con.setRequestMethod("GET");
@@ -64,18 +75,13 @@ public class UserController {
 				buff.append(str + "\n");
 			}
 			String data = buff.toString().trim();
-			System.out.println(data);
-//			model.addAttribute("reqResult", data);
-			int pageTotal = userService.getPageTotal();
-			PageMakerDTO pageMake = new PageMakerDTO(cri, pageTotal);
-			System.out.println("start = " + pageMake.getStartPage());
-			System.out.println("end = " + pageMake.getEndPage());
-			System.out.println("total = " + pageMake.getTotal());
-			System.out.println("cri = " + pageMake.getCri());
+			model.addAttribute("reqResult", data);
+//			int pageTotal = userService.getPageTotal();
+//			PageMakerDTO pageMake = new PageMakerDTO(cri, pageTotal);
 			List<newsVO> testList = userService.getNews(cri);
 			model.addAttribute("search", search);
 			model.addAttribute("testList", testList);
-			model.addAttribute("pageMaker", pageMake);
+//			model.addAttribute("pageMaker", pageMake);
 			
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -83,11 +89,18 @@ public class UserController {
 		return "results";
 	}
 	
+	@RequestMapping(value = version + "main-board/{category}")
+	public String tests(Model model,@PathVariable String category) {
+		System.out.println(category);
+		return "/";
+	}
+	
 	
 	@RequestMapping("/test")
 	public String test(Model model) {
-		int test = userService.getPageTotal();
-		model.addAttribute("test", test);
+		newsVO newsVO = new newsVO();
+//		int test = userService.getPageTotal();
+//		model.addAttribute("test", test);
 		return "test";
 	}
 	
@@ -102,4 +115,5 @@ public class UserController {
 		
 		return "index";
 	}
+	
 }

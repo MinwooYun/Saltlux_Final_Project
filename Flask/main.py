@@ -17,7 +17,7 @@ def index():
 def get_results():
     print(request.method)
 
-    data = request.args.get('search')
+    data = request.args.get('search', 'utf-8')
     print(data)
 
     response = make_response(jsonify(data))

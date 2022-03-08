@@ -29,4 +29,10 @@ public class UserService implements IUserService {
 		return mapper.getNews(cri);
 	}
 
+
+	@Override
+	public List<newsVO> getDB(int cnt) {
+		return mapper.getDB(cnt);
+	}
+
 }
