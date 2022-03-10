@@ -6,7 +6,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.kosa.saltlux.vo.newsVO;
+import com.kosa.saltlux.vo.NewsVO;
 
 public class testGson {
 
@@ -22,8 +22,8 @@ public class testGson {
 			
 		};
 		
-		newsVO newsVO = new newsVO();
-		newsVO.setTitle("tile");
+		NewsVO newsVO = new NewsVO();
+		newsVO.setTitle("title");
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		

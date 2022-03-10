@@ -2,7 +2,7 @@ package com.kosa.saltlux.vo;
 
 import java.sql.Date;
 
-public class newsVO {
+public class NewsVO {
 	private int newsNo;
 	private String title;
 	private String contents;

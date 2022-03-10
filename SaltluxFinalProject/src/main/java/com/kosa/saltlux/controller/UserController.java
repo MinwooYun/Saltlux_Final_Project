@@ -28,7 +28,7 @@ import com.kosa.saltlux.HomeController;
 import com.kosa.saltlux.repository.PageMakerDTO;
 import com.kosa.saltlux.service.IUserService;
 import com.kosa.saltlux.vo.Criteria;
-import com.kosa.saltlux.vo.newsVO;
+import com.kosa.saltlux.vo.NewsVO;
 
 @Controller
 public class UserController {

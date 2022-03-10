@@ -31,10 +31,10 @@ public class ElasticSearchConfig {
 	private Integer port = 9243;
 
 	private String user = "elastic";
+	
 	private String password = "i8Fyr6KQKVDzBEjrZKKZZcii";
-
-	@Bean(name="restHighLevelClientSSLIgnore")
-	public RestHighLevelClient restHighLevelClientSSLIgnore() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+	
+	private RestHighLevelClient restHighLevelClientSSLIgnore() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		
 		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 		credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
@@ -60,6 +60,7 @@ public class ElasticSearchConfig {
 							}
 						}));
 		
+		System.out.println("elasticsearch client created");
 		return client;
 
 	}

@@ -9,8 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.kosa.saltlux.repository.IUserRepository;
 import com.kosa.saltlux.vo.Criteria;
-import com.kosa.saltlux.vo.newsVO;
-import com.kosa.saltlux.vo.testVO;
+import com.kosa.saltlux.vo.NewsVO;
 
 @Service
 public class UserService implements IUserService {
@@ -25,7 +24,7 @@ public class UserService implements IUserService {
 
 
 	@Override
-	public List<newsVO> getNews(Criteria cri) {
+	public List<NewsVO> getNews(Criteria cri) {
 		return mapper.getNews(cri);
 	}
 

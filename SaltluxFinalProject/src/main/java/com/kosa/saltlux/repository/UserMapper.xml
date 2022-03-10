@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kosa.saltlux.repository.IUserRepository">
-	<resultMap type="com.kosa.saltlux.vo.newsVO" id="newsMap">
+	<resultMap type="com.kosa.saltlux.vo.NewsVO" id="newsMap">
 		<result column="NEWS_NO" property="newsNo" />
 		<result column="TITLE" property="title" />
 		<result column="CONTENTS" property="contents" />
