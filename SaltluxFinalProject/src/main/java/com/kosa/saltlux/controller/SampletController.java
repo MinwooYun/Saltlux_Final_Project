@@ -65,4 +65,21 @@ public class SampletController {
 		
 	}
 	
+	
+	@GetMapping(value = "/newsTest")
+	public String newsTest(Model model) {
+		
+		HashMap<String, String> hashMap = new HashMap<String, String>() {
+
+			private static final long serialVersionUID = 1L;
+			{
+				put("classes", "1조");
+				put("name", "Pre Luxsian");
+				put("title", "name");
+			}
+		};
+		model.addAttribute("jsonData", hashMap);
+		
+		return "jsonView";
+	}	
 }

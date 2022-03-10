@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kosa.saltlux.repository.IUserRepository">
-	<resultMap type="com.kosa.saltlux.vo.NewsVO" id="newsMap">
+	<resultMap type="com.kosa.saltlux.vo.NewsVO" id="NewsMap">
 		<result column="NEWS_NO" property="newsNo" />
 		<result column="TITLE" property="title" />
 		<result column="CONTENTS" property="contents" />
 		<result column="IMAGE_URL" property="imageURL" />
 		<result column="THUMBNAIL_URL" property="thumbnailURL" />
 		<result column="PRESS" property="press" />
-		<result column="CATEGORYA" property="category" />
+		<result column="CATEGORY" property="category" />
 		<result column="NEWS_DATE" property="newsDate" />
 		<result column="NOUNS" property="nouns" />
+	</resultMap>
+	
+	<resultMap type="com.kosa.saltlux.vo.RealtimeVO" id="RealtimeMap">
+		<result column="KEYWORD" property="keyword" />
+		<result column="BTFRATIO" property="btfRatio" />
+	</resultMap>
+	
+	<resultMap type="com.kosa.saltlux.vo.MainDashBoardVO" id="MainDashBoardMap">
+		<result column="YEAR" property="year" />
+		<result column="MONTH" property="month" />
+		<result column="DAY" property="day" />
+		<result column="HOUR" property="hour" />
+		<result column="KEYWORD" property="keyword" />
+		<result column="CATEGORY" property="category" />
+		<result column="BTF" property="btf" />
+		<result column="NTF1" property="ntf1" />
 	</resultMap>
 	
 	<select id="getPageTotal" resultType="int">
@@ -18,7 +34,16 @@
 	</select>
 	
 	<select id="getNews" resultType="com.kosa.saltlux.vo.NewsVO">
-		SELECT * FROM luxian.NEWS
+		SELECT NEWS_NO AS newsNo,
+			   TITLE AS title,
+			   CONTENTS AS contents,
+			   IMAGE_URL AS imageURL,
+			   THUMBNAIL_URL AS thumbnailURL,
+			   PRESS AS press,
+			   CATEGORY AS category,
+			   NEWS_DATE AS newsDate,
+			   NOUNS AS nouns 
+		FROM luxian.NEWS
 		limit 10;
 	</select>
 	
@@ -34,6 +59,22 @@
 			   NOUNS AS nouns
 		FROM luxian.NEWS
 		limit #{cnt}, 10;
+	</select>
+	
+	<select id="getMainDashBoard" resultType="com.kosa.saltlux.vo.MainDashBoardVO">
+		select YEAR     AS year
+			  ,MONTH    AS month
+			  ,DAY      AS day
+			  ,HOUR     AS hour
+			  ,KEYWORD  AS keyword
+			  ,CATEGORY AS category
+			  ,BTF      AS btf
+			  ,NTF1     AS ntf1 
+		from luxian.maindashboard
+		group by keyword
+		having category = #{category}
+		order by btf desc
+		limit 200;
 	</select>
 
 </mapper>

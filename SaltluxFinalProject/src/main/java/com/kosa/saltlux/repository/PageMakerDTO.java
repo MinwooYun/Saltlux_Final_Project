@@ -1,6 +1,6 @@
 package com.kosa.saltlux.repository;
 
-import com.kosa.saltlux.vo.Criteria;
+import com.kosa.saltlux.vo.CriteriaVO;
 
 public class PageMakerDTO {
 	/* 시작 페이지 */
@@ -16,10 +16,10 @@ public class PageMakerDTO {
 	private int total;
 	
 	/* 현재 페이지, 페이지당 게시물 표시수 정보 */
-	private Criteria cri;	
+	private CriteriaVO cri;	
 	
 	/* 생성자 */
-	public PageMakerDTO(Criteria cri, int total) {
+	public PageMakerDTO(CriteriaVO cri, int total) {
 		
 		this.cri = cri;
 		this.total = total;
@@ -87,11 +87,11 @@ public class PageMakerDTO {
 		this.total = total;
 	}
 
-	public Criteria getCri() {
+	public CriteriaVO getCri() {
 		return cri;
 	}
 
-	public void setCri(Criteria cri) {
+	public void setCri(CriteriaVO cri) {
 		this.cri = cri;
 	}
 

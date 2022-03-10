@@ -85,13 +85,13 @@
 			</div>
 			<div class="leftContents">
 				<div class="newsContents">
-					<c:forEach var="test" items="${testList}">
+					<c:forEach var="news" items="${newsList}">
 						<div class="newsContentsList" style="border:1px solid red;">
-							<img class="thumbnail" src="${test.thumbnailURL}">
+							<img class="thumbnail" src="${news.thumbnailURL}">
 							<br>
-							<p class="contentTitle">${test.title}</p>
+							<p class="contentTitle">${news.title}</p>
 							<br>
-							<p>${test.category}</p>
+							<p>${news.category}</p>
 							<br>
 						</div>
 					</c:forEach>

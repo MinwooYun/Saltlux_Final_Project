@@ -24,13 +24,21 @@
 	<script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 	<!-- CSS Files -->
 	<link id="pagestyle" href="resources/assets/css/material-kit.css?v=3.0.0" rel="stylesheet" />	
-
+	
+	<!-- WordCloud BarChart -->
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/wordcloud.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+	<script src="https://code.highcharts.com/modules/export-data.js"></script>
+	<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+	
 <style>
 .textbox {
   outline: 0;
   height: 100%;
-  width: 70%;
-  line-height: 42px;
+  width: 90%;
+  font-size: 30px;
+  line-height: 80px;
   padding: 0 16px;
   background-color: rgba(255, 255, 255, 0.8);
   color: #212121;
@@ -47,8 +55,8 @@
   background: none;
   background-color: rgba(38, 50, 56, 0.8);
   float: left;
-  height: 42px;
-  width: 42px;
+  height: 80px;
+  width: 80px;
   text-align: center;
   line-height: 42px;
   border: 0;
@@ -185,7 +193,216 @@ label .fa {
 .link {
   text-align:center;
 }
+
+/*WordCloud CSS*/
+.highcharts-figure,
+.highcharts-data-table table {
+    min-width: 80%;
+    max-width: 90%;
+    margin: 1em auto;
+}
+
+.highcharts-data-table table {
+    font-family: Verdana, sans-serif;
+    border-collapse: collapse;
+    border: 1px solid #ebebeb;
+    margin: 10px auto;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.highcharts-data-table caption {
+    padding: 1em 0;
+    font-size: 1.2em;
+    color: #555;
+}
+
+.highcharts-data-table th {
+    font-weight: 600;
+    padding: 0.5em;
+}
+
+.highcharts-data-table td,
+.highcharts-data-table th,
+.highcharts-data-table caption {
+    padding: 0.5em;
+}
+
+.highcharts-data-table thead tr,
+.highcharts-data-table tr:nth-child(even) {
+    background: #f8f8f8;
+}
+
+.highcharts-data-table tr:hover {
+    background: #f1f7ff;
+}
+/*end WordCloud*/
+
 </style>
+<script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript">
+$(function() {
+	$("input[name='cateogryName']").click(function() {
+		console.log()
+		var categoryName = $("input[name='cateogryName']:checked").val();
+		var categortID = $("input[name='cateogryName']:checked").attr('id');
+		var categoryKR = $("label[for='"+categortID+"']").attr('id');
+		var selectRadio = categoryName + '-radio-wordcloud';
+		
+		$('input:radio[name=select-chart]:input[value=' + selectRadio + ']').attr("checked", true);
+		$.ajax({
+			url : "/api/v1/main-board/dash-board/wordcloud/" + categoryKR,
+			async : true,
+			type : "POST",
+			data : categoryName,
+			processData : false,
+			contentType : false,
+			success : function(data) {
+				OnSuccessWordcloud(data, categoryName);
+			},
+			error : function(e) {
+				console.log("ERROR:", e);
+				alert("fail");
+			}
+		});
+		
+		$.ajax({
+			url : "/api/v1/main-board/dash-board/barchart/" + categoryKR,
+			async : true,
+			type : "POST",
+			data : categoryName,
+			processData : false,
+			contentType : false,
+			success : function(data) {
+				alert("aaaaa");
+				OnSuccessBarchart(data, categoryName);
+			},
+			error : function(e) {
+				console.log("ERROR:", e);
+				alert("fail");
+			}
+		});
+	});
+	
+	//ajax = Success 워드클라우드 함수
+	function OnSuccessWordcloud(data, categoryName) {
+		data = JSON.parse(data);
+		//WordCloud
+		Highcharts.chart(categoryName + '-wordcloud', {
+		    accessibility: {
+		        screenReaderSection: {
+		            beforeChartFormat: '<h5>{chartTitle}</h5>' +
+		                '<div>{chartSubtitle}</div>' +
+		                '<div>{chartLongdesc}</div>' +
+		                '<div>{viewTableButton}</div>'
+		        }
+		    },
+		    series: [{
+		        type: 'wordcloud',
+		        data,
+		        name: '빈도수'
+		    }],
+		    title: {
+		        text: categoryName + ' 카테고리 워드 클라우드'
+		    }
+		});
+		//end WordCloud
+		
+		//Barchart
+		function OnSuccessBarchart(data, categoryName) {
+			//BarChart
+			Highcharts.chart(categoryName + '-barchart', {
+			    chart: {
+			        type: 'column'
+			    },
+			    title: {
+			        text: 'World\'s largest cities per 2017'
+			    },
+			    subtitle: {
+			        text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+			    },
+			    xAxis: {
+			        type: 'category',
+			        labels: {
+			            rotation: -45,
+			            style: {
+			                fontSize: '13px',
+			                fontFamily: 'Verdana, sans-serif'
+			            }
+			        }
+			    },
+			    yAxis: {
+			        min: 0,
+			        title: {
+			            text: 'Population (millions)'
+			        }
+			    },
+			    legend: {
+			        enabled: false
+			    },
+			    tooltip: {
+			        pointFormat: 'Population in 2017: <b>{point.y:.1f} millions</b>'
+			    },
+			    series: [{
+			        name: 'Population',
+			        data: [
+			            ['Shanghai', 24.2],
+			            ['Beijing', 20.8],
+			            ['Karachi', 14.9],
+			            ['Shenzhen', 13.7],
+			            ['Guangzhou', 13.1],
+			            ['Istanbul', 12.7],
+			            ['Mumbai', 12.4],
+			            ['Moscow', 12.2],
+			            ['São Paulo', 12.0],
+			            ['Delhi', 11.7],
+			            ['Kinshasa', 11.5],
+			            ['Tianjin', 11.2],
+			            ['Lahore', 11.1],
+			            ['Jakarta', 10.6],
+			            ['Dongguan', 10.6],
+			            ['Lagos', 10.6],
+			            ['Bengaluru', 10.3],
+			            ['Seoul', 9.8],
+			            ['Foshan', 9.3],
+			            ['Tokyo', 9.3]
+			        ],
+			        dataLabels: {
+			            enabled: true,
+			            rotation: -90,
+			            color: '#FFFFFF',
+			            align: 'right',
+			            format: '{point.y:.1f}', // one decimal
+			            y: 10, // 10 pixels down from the top
+			            style: {
+			                fontSize: '13px',
+			                fontFamily: 'Verdana, sans-serif'
+			            }
+			        }
+			    }]
+			});
+		}
+		//end BarChart
+	}
+	//end function()
+});
+$(function() {
+	$("input[name='select-chart']").click(function() {
+		var categoryName = $("input[name='cateogryName']:checked").val();
+		var chart = $("input[name='select-chart']:checked").val();
+		var chartRadio = categoryName + "-radio-" + chart;
+		if($('input:radio[name=select-chart]:input[value=' + chartRadio + ']').is(':checked')){
+			alert("a");
+	        //$('#divId').hide();
+	    }else{
+	    	alert("b");
+	        //$('#divId').show();
+	    }
+	});
+});	
+</script>
+
 </head>
 <jsp:include page="../views/include/header.jsp"></jsp:include>
 <body class="index-page bg-gray-200">
@@ -220,81 +437,148 @@ label .fa {
 			</div>
 		</section>
 		<div class="tab_container">
-			<input id="tab1" type="radio" name="tabs" class="input_style">
-			<label for="tab1"><i class="fa fa-circle-o-notch"></i><br><span><a href="localhost:8080/api/v1/main-board/all">전체</a></span></label>
+			<input id="tab1" type="radio" name="cateogryName" class="input_style" value="all">
+			<label for="tab1" id="전체"><i class="fa fa-circle-o-notch"></i><br><span>전체</span></label>
 		
-			<input id="tab2" type="radio" name="tabs" class="input_style">
-			<label for="tab2"><i class="fa fa-pencil-square-o"></i><br><span>사회</span></label>
+			<input id="tab2" type="radio" name="cateogryName" class="input_style" value="society">
+			<label for="tab2" id="사회"><i class="fa fa-pencil-square-o"></i><br><span>사회</span></label>
 		
-			<input id="tab3" type="radio" name="tabs" class="input_style">
-			<label for="tab3"><i class="fa fa-bar-chart-o"></i><br><span>연예</span></label>
+			<input id="tab3" type="radio" name="cateogryName" class="input_style" value="entertainment">
+			<label for="tab3" id="연예"><i class="fa fa-bar-chart-o"></i><br><span>연예</span></label>
 		
-			<input id="tab4" type="radio" name="tabs" class="input_style">
-			<label for="tab4"><i class="fa fa-folder-open-o"></i><br><span>경제</span></label>
+			<input id="tab4" type="radio" name="cateogryName" class="input_style" value="economy">
+			<label for="tab4" id="경제"><i class="fa fa-folder-open-o"></i><br><span>경제</span></label>
 		
-			<input id="tab5" type="radio" name="tabs" class="input_style">
-			<label for="tab5"><i class="fa fa-envelope-o"></i><br><span>정치</span></label>
+			<input id="tab5" type="radio" name="cateogryName" class="input_style" value="politics">
+			<label for="tab5" id="정치"><i class="fa fa-envelope-o"></i><br><span>정치</span></label>
 			
-			<input id="tab6" type="radio" name="tabs" class="input_style">
-			<label for="tab6"><i class="fa fa-envelope-o"></i><br><span>스포츠</span></label>
+			<input id="tab6" type="radio" name="cateogryName" class="input_style" value="sport">
+			<label for="tab6" id="스포츠"><i class="fa fa-envelope-o"></i><br><span>스포츠</span></label>
 			
-			<input id="tab7" type="radio" name="tabs" class="input_style">
-			<label for="tab7"><i class="fa fa-envelope-o"></i><br><span>문화</span></label>
+			<input id="tab7" type="radio" name="cateogryName" class="input_style" value="culture">
+			<label for="tab7" id="문화"><i class="fa fa-envelope-o"></i><br><span>문화</span></label>
 			
-			<input id="tab8" type="radio" name="tabs" class="input_style">
-			<label for="tab8"><i class="fa fa-envelope-o"></i><br><span>국제</span></label>
+			<input id="tab8" type="radio" name="cateogryName" class="input_style" value="global">
+			<label for="tab8" id="국제"><i class="fa fa-envelope-o"></i><br><span>국제</span></label>
 			
-			<input id="tab9" type="radio" name="tabs" class="input_style">
-			<label for="tab9"><i class="fa fa-envelope-o"></i><br><span>IT</span></label>
-		
+			<input id="tab9" type="radio" name="cateogryName" class="input_style" value="it">
+			<label for="tab9" id="it"><i class="fa fa-envelope-o"></i><br><span>IT</span></label>
+			
 			<section id="content1" class="tab-content input_style">
+			<input type="radio" id="all-radio-wordcloud" name="select-chart" value="all-radio-wordcloud">워드클라우드
+			<input type="radio" id="all-radio-barchart" name="select-chart" value="all-radio-barchart">막대그래프
 				<h3>전체 카테고리</h3>
-				<div>
-					<input type="radio" name="all-category" checked>워드클라우드
-					<input type="radio" name="all-category">꺽은선 그래프
-				</div>
-		      	<p>https://fontawesome.com/v4/icons/</p>
-		      	
+		      	<figure class="highcharts-figure">
+				    <div id="all-wordcloud"></div>
+				    <div id="all-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 		
 			<section id="content2" class="tab-content input_style">
+			<input type="radio" id="society-radio-wordcloud" name="select-chart" value="society-radio-wordcloud">워드클라우드
+			<input type="radio" id="society-radio-barchart" name="select-chart" value="society-radio-barchart">막대그래프
 				<h3>사회 카테고리</h3>
-		      	<p>text2</p>
+		      	<figure class="highcharts-figure">
+				    <div id="society-wordcloud"></div>
+				    <div id="society-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 		
 			<section id="content3" class="tab-content input_style">
+			<input type="radio" id="entertainment-radio-wordcloud" name="select-chart" value="entertainment-radio-wordcloud">워드클라우드
+			<input type="radio" id="entertainment-radio-barchart" name="select-chart" value="entertainment-radio-barchart">막대그래프
 				<h3>연예 카테고리</h3>
-		      	<p>text3</p>
+		      	<figure class="highcharts-figure">
+				    <div id="entertainment-wordcloud"></div>
+				    <div id="entertainment-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 		
 			<section id="content4" class="tab-content input_style">
+			<input type="radio" id="economy-radio-wordcloud" name="select-chart" value="economy-radio-wordcloud">워드클라우드
+			<input type="radio" id="economy-radio-barchart" name="select-chart" value="economy-radio-barchart">막대그래프
 				<h3>경제 카테고리</h3>
-		      	<p>text4</p>
+		      	<figure class="highcharts-figure">
+				    <div id="economy-wordcloud"></div>
+				    <div id="economy-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 		
 			<section id="content5" class="tab-content input_style">
+			<input type="radio" id="politics-radio-wordcloud" name="select-chart" value="politics-radio-wordcloud">워드클라우드
+			<input type="radio" id="politics-radio-barchart" name="select-chart" value="politics-radio-barchart">막대그래프
 				<h3>정치 카테고리</h3>
-		      	<p>text 5</p>
+		      	<figure class="highcharts-figure">
+				    <div id="politics-wordcloud"></div>
+				    <div id="politics-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 			
 			<section id="content6" class="tab-content input_style">
+			<input type="radio" id="sport-radio-wordcloud" name="select-chart" value="sport-radio-wordcloud">워드클라우드
+			<input type="radio" id="sport-radio-barchart" name="select-chart" value="sport-radio-barchart">막대그래프
 				<h3>스포츠 카테고리</h3>
-		      	<p>text 6</p>
+		      	<figure class="highcharts-figure">
+				    <div id="sport-wordcloud"></div>
+				    <div id="sport-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 			
 			<section id="content7" class="tab-content input_style">
+			<input type="radio" id="culture-radio-wordcloud" name="select-chart" value="culture-radio-wordcloud">워드클라우드
+			<input type="radio" id="culture-radio-barchart" name="select-chart" value="culture-radio-barchart">막대그래프
 				<h3>문화 카테고리</h3>
-		      	<p>text 7</p>
+		      	<figure class="highcharts-figure">
+				    <div id="culture-wordcloud"></div>
+				    <div id="culture-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 			
 			<section id="content8" class="tab-content input_style">
+			<input type="radio" id="global-radio-wordcloud" name="select-chart" value="global-radio-wordcloud">워드클라우드
+			<input type="radio" id="global-radio-barchart" name="select-chart" value="global-radio-barchart">막대그래프
 				<h3>국제 카테고리</h3>
-		      	<p>text 8</p>
+		      	<figure class="highcharts-figure">
+				    <div id="global-wordcloud"></div>
+				    <div id="global-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 			
 			<section id="content9" class="tab-content input_style">
+			<input type="radio" id="it-radio-wordcloud" name="select-chart" value="it-radio-wordcloud">워드클라우드
+			<input type="radio" id="it-radio-barchart" name="select-chart" value="it-radio-barchart">막대그래프
 				<h3>IT 카테고리</h3>
-		      	<p>text 9</p>
+		      	<figure class="highcharts-figure">
+					<div id="it-wordcloud"></div>
+				    <div id="it-barchart"></div>
+				    <p class="highcharts-description">
+			        	카테고리의 워드클라우드 설명글
+				    </p>
+				</figure>
 			</section>
 		</div>
 	</div>

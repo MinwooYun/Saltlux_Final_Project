@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kosa.saltlux.repository.IUserRepository;
-import com.kosa.saltlux.vo.Criteria;
+import com.kosa.saltlux.vo.CriteriaVO;
+import com.kosa.saltlux.vo.MainDashBoardVO;
 import com.kosa.saltlux.vo.NewsVO;
+import com.kosa.saltlux.vo.RealtimeVO;
 
 @Service
 public class UserService implements IUserService {
@@ -24,7 +26,7 @@ public class UserService implements IUserService {
 
 
 	@Override
-	public List<NewsVO> getNews(Criteria cri) {
+	public List<NewsVO> getNews(CriteriaVO cri) {
 		return mapper.getNews(cri);
 	}
 
@@ -32,6 +34,12 @@ public class UserService implements IUserService {
 	@Override
 	public List<NewsVO> getDB(int cnt) {
 		return mapper.getDB(cnt);
+	}
+
+
+	@Override
+	public List<MainDashBoardVO> getMainDashBoard(String category) {
+		return mapper.getMainDashBoard(category);
 	}
 
 }

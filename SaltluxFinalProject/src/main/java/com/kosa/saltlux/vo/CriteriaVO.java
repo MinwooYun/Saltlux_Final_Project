@@ -2,7 +2,7 @@ package com.kosa.saltlux.vo;
 
 import java.util.Arrays;
 
-public class Criteria {
+public class CriteriaVO {
 	/* 현재 페이지 */
 	private int pageNum;
 	
@@ -19,12 +19,12 @@ public class Criteria {
 	private String[] typeArr;
 	
 	/* 기본 생성자 -> 기봅 세팅 : pageNum = 1, amount = 10 */
-	public Criteria() {
+	public CriteriaVO() {
 		this(1,10);
 	}
 	
 	/* 생성자 => 원하는 pageNum, 원하는 amount */
-	public Criteria(int pageNum, int amount) {
+	public CriteriaVO(int pageNum, int amount) {
 		this.pageNum = pageNum;
 		this.amount = amount;
 	}

@@ -12,6 +12,7 @@ public class NewsVO {
 	private String category;
 	private Date newsDate;
 	private String nouns;
+	
 	public int getNewsNo() {
 		return newsNo;
 	}

@@ -6,12 +6,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -19,16 +18,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kosa.saltlux.HomeController;
-import com.kosa.saltlux.repository.PageMakerDTO;
 import com.kosa.saltlux.service.IUserService;
-import com.kosa.saltlux.vo.Criteria;
 import com.kosa.saltlux.vo.NewsVO;
+import com.kosa.saltlux.vo.CriteriaVO;
+import com.kosa.saltlux.vo.MainDashBoardVO;
 
 @Controller
 public class UserController {
@@ -36,7 +35,7 @@ public class UserController {
 	@Autowired
 	IUserService userService;
 	
-	public static final String version = "api/v1";
+	public static final String version = "/api/v1/";
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
@@ -47,13 +46,11 @@ public class UserController {
 	public String home(Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
-		model.addAttribute("data", "[{country: 'USA', value: 2025}, {country: 'KOR', value: 1500}]");
-		
 		return "home";
 	}
 	
 	@RequestMapping("/results")
-	public String testRestRequest(Model model, String search, Criteria cri) {
+	public String testRestRequest(Model model, String search, CriteriaVO cri) {
 		try {
 			System.out.println(search);
 			String keyword = search.replace(" ", "-");
@@ -78,9 +75,10 @@ public class UserController {
 			model.addAttribute("reqResult", data);
 //			int pageTotal = userService.getPageTotal();
 //			PageMakerDTO pageMake = new PageMakerDTO(cri, pageTotal);
-			List<NewsVO> testList = userService.getNews(cri);
+			List<NewsVO> newsList = userService.getNews(cri);
+			
 			model.addAttribute("search", search);
-			model.addAttribute("testList", testList);
+			model.addAttribute("newsList", newsList);
 //			model.addAttribute("pageMaker", pageMake);
 			
 		}catch(Exception e) {
@@ -89,31 +87,63 @@ public class UserController {
 		return "results";
 	}
 	
-	@RequestMapping(value = version + "main-board/{category}")
-	public String tests(Model model,@PathVariable String category) {
-		System.out.println(category);
-		return "/";
-	}
-	
-	
-	@RequestMapping("/test")
-	public String test(Model model) {
-		NewsVO newsVO = new NewsVO();
-//		int test = userService.getPageTotal();
-//		model.addAttribute("test", test);
-		return "test";
-	}
-	
-	@RequestMapping("/req_image_ajax1")
-	public String flaskImage(Model model) {
-		return "req_image_ajax1";
-	}
-	
-	@RequestMapping("/index")
-	public String index(Model model) {
-		model.addAttribute("data", "[{country: 'USA', value: 70}, {country: 'KOR', value: 15}]");
+	/**
+	 * MainDashBoard테이블의 그룹별 데이터를 검색
+	 * BTF가 높은 순서대로 n개의 키워드 추출
+	 * @param categoryName
+	 * @param model
+	 * @return jsonList.toString()
+	 */
+	@ResponseBody
+	@RequestMapping(value = version + "main-board/dash-board/wordcloud/{categoryName}", method = RequestMethod.POST, produces = "application/text; charset=UTF-8")
+	public String MainDashBoardWordcloud(@PathVariable String categoryName, Model model) {
+		List<MainDashBoardVO> mainDashBoardList = userService.getMainDashBoard(categoryName);
+		Map<String, Object> map = new HashMap<>();
+		List<JSONObject> jsonList = new ArrayList<>();
 		
-		return "index";
+		for(MainDashBoardVO vo : mainDashBoardList) {
+			map.put("name", vo.getKeyword());
+			map.put("weight", vo.getBtf());
+			JSONObject jsonObject = new JSONObject(map);
+			jsonList.add(jsonObject);
+			map.clear();
+		}
+		
+		/**
+		 * 카테고리 div id = (wordcloud, barchart)
+		 * 전체 : all-wordcloud / all-barchart
+		 * 사회 : society-wordcloud / society-barchart
+		 * 연예 : entertainment-wordcloud / entertainment-barchart
+		 * 경제 : economy-wordcloud / economy-barchart
+		 * 정치 : politics-wordcloud / politics-barchart
+		 * 스포츠 : sport-wordcloud / sport-barchart
+		 * 문화 : culture-wordcloud / culture-barchart
+		 * 국제 : global-wordcloud / global-barchart
+		 * IT : it-wordclout / it-barchart
+		 */
+
+		return jsonList.toString();
 	}
 	
+	@ResponseBody
+	@RequestMapping(value = version + "main-board/dash-board/barchart/{categoryName}", method = RequestMethod.POST, produces = "application/text; charset=UTF-8")
+	public String MainDashBoardBarchart(@PathVariable String categoryName, Model model) {
+		System.out.println(categoryName);
+		/**
+		 * 카테고리 div id = (wordcloud, barchart)
+		 * 전체 : all-wordcloud / all-barchart
+		 * 사회 : society-wordcloud / society-barchart
+		 * 연예 : entertainment-wordcloud / entertainment-barchart
+		 * 경제 : economy-wordcloud / economy-barchart
+		 * 정치 : politics-wordcloud / politics-barchart
+		 * 스포츠 : sport-wordcloud / sport-barchart
+		 * 문화 : culture-wordcloud / culture-barchart
+		 * 국제 : global-wordcloud / global-barchart
+		 * IT : it-wordclout / it-barchart
+		 */
+		
+		String data = "sample";
+
+		return data;
+	}
 }
