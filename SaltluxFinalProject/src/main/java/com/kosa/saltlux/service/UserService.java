@@ -30,7 +30,7 @@ public class UserService implements IUserService {
 
 
 	@Override
-	public List<newsVO> getDB(int cnt) {
+	public List<NewsVO> getDB(int cnt) {
 		return mapper.getDB(cnt);
 	}
 

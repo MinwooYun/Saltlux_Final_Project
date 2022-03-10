@@ -78,7 +78,7 @@ public class UserController {
 			model.addAttribute("reqResult", data);
 //			int pageTotal = userService.getPageTotal();
 //			PageMakerDTO pageMake = new PageMakerDTO(cri, pageTotal);
-			List<newsVO> testList = userService.getNews(cri);
+			List<NewsVO> testList = userService.getNews(cri);
 			model.addAttribute("search", search);
 			model.addAttribute("testList", testList);
 //			model.addAttribute("pageMaker", pageMake);
@@ -98,7 +98,7 @@ public class UserController {
 	
 	@RequestMapping("/test")
 	public String test(Model model) {
-		newsVO newsVO = new newsVO();
+		NewsVO newsVO = new NewsVO();
 //		int test = userService.getPageTotal();
 //		model.addAttribute("test", test);
 		return "test";

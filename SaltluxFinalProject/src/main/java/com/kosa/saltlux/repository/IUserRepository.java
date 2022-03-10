@@ -14,6 +14,6 @@ public interface IUserRepository {
 //	모든 뉴스데이터 가져오기
 	List<NewsVO> getNews(Criteria cri);
 //	mariaDB 데이터 조회
-	List<newsVO> getDB(@Param("cnt")int cnt);
+	List<NewsVO> getDB(@Param("cnt")int cnt);
 	
 }

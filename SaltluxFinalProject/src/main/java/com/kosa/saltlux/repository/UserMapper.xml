@@ -17,12 +17,12 @@
 		SELECT COUNT(*) FROM luxian.NEWS;
 	</select>
 	
-	<select id="getNews" resultType="com.kosa.saltlux.vo.newsVO">
+	<select id="getNews" resultType="com.kosa.saltlux.vo.NewsVO">
 		SELECT * FROM luxian.NEWS
 		limit 10;
 	</select>
 	
-	<select id="getDB" resultType="com.kosa.saltlux.vo.newsVO">
+	<select id="getDB" resultType="com.kosa.saltlux.vo.NewsVO">
 		SELECT NEWS_NO AS newsNo,
 			   TITLE AS title,
 			   CONTENTS AS contents,

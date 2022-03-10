@@ -13,5 +13,5 @@ public interface IUserService {
 	List<NewsVO> getNews(Criteria cri);
 //	mariaDB 데이터 조회
 	
-	List<newsVO> getDB(int cnt);
+	List<NewsVO> getDB(int cnt);
 }
