@@ -14,11 +14,14 @@ public interface IUserRepository {
 	int getPageTotal();
 	
 //	모든 뉴스데이터 가져오기
+	List<NewsVO> getNews(CriteriaVO cri);
+	
 //	mariaDB 데이터 조회
 	List<NewsVO> getDB(@Param("cnt")int cnt);
 	
-//	GET 메인페이지 대시보드의 키워드 btf, ntf
-	List<MainDashBoardVO> getMainDashBoard(String category);
-	List<NewsVO> getNews(CriteriaVO cri);
+//	GET 메인페이지 대시보드의 Wordcloud
+	List<MainDashBoardVO> getMainDashBoardWordcloud(String category);
 	
+//	GET 결과페이지 Top 10
+	List<RealtimeVO> getRealtimeTop();
 }

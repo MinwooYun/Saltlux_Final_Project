@@ -32,6 +32,9 @@
 	<script src="https://code.highcharts.com/modules/export-data.js"></script>
 	<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 	
+	<link href="https://code.jquery.com/ui/1.13.0/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+	
+	
 <style>
 .textbox {
   outline: 0;
@@ -241,8 +244,23 @@ label .fa {
 
 </style>
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
 <script type="text/javascript">
 $(function() {
+	 $( "#searchBox" ).autocomplete({
+	    	source: function( request, response ) {
+				$.ajax( {
+					url: "autocomplete",
+					dataType: "jsonp",
+					data: {
+						term: request.term
+					},
+					success: function( data ) {
+						response( data.words );
+					}
+				} );
+			}
+	    });
 	$("input[name='cateogryName']").click(function() {
 		console.log()
 		var categoryName = $("input[name='cateogryName']:checked").val();
@@ -252,30 +270,14 @@ $(function() {
 		
 		$('input:radio[name=select-chart]:input[value=' + selectRadio + ']').attr("checked", true);
 		$.ajax({
-			url : "/api/v1/main-board/dash-board/wordcloud/" + categoryKR,
-			async : true,
+			url : "/api/v1/main-board/dash-board/chart/" + categoryKR,
+			async : false,
 			type : "POST",
 			data : categoryName,
 			processData : false,
 			contentType : false,
 			success : function(data) {
 				OnSuccessWordcloud(data, categoryName);
-			},
-			error : function(e) {
-				console.log("ERROR:", e);
-				alert("fail");
-			}
-		});
-		
-		$.ajax({
-			url : "/api/v1/main-board/dash-board/barchart/" + categoryKR,
-			async : true,
-			type : "POST",
-			data : categoryName,
-			processData : false,
-			contentType : false,
-			success : function(data) {
-				alert("aaaaa");
 				OnSuccessBarchart(data, categoryName);
 			},
 			error : function(e) {
@@ -285,7 +287,7 @@ $(function() {
 		});
 	});
 	
-	//ajax = Success 워드클라우드 함수
+	//ajax = Success Wordcloud
 	function OnSuccessWordcloud(data, categoryName) {
 		data = JSON.parse(data);
 		//WordCloud
@@ -308,84 +310,70 @@ $(function() {
 		    }
 		});
 		//end WordCloud
-		
-		//Barchart
-		function OnSuccessBarchart(data, categoryName) {
-			//BarChart
-			Highcharts.chart(categoryName + '-barchart', {
-			    chart: {
-			        type: 'column'
-			    },
-			    title: {
-			        text: 'World\'s largest cities per 2017'
-			    },
-			    subtitle: {
-			        text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
-			    },
-			    xAxis: {
-			        type: 'category',
-			        labels: {
-			            rotation: -45,
-			            style: {
-			                fontSize: '13px',
-			                fontFamily: 'Verdana, sans-serif'
-			            }
-			        }
-			    },
-			    yAxis: {
-			        min: 0,
-			        title: {
-			            text: 'Population (millions)'
-			        }
-			    },
-			    legend: {
-			        enabled: false
-			    },
-			    tooltip: {
-			        pointFormat: 'Population in 2017: <b>{point.y:.1f} millions</b>'
-			    },
-			    series: [{
-			        name: 'Population',
-			        data: [
-			            ['Shanghai', 24.2],
-			            ['Beijing', 20.8],
-			            ['Karachi', 14.9],
-			            ['Shenzhen', 13.7],
-			            ['Guangzhou', 13.1],
-			            ['Istanbul', 12.7],
-			            ['Mumbai', 12.4],
-			            ['Moscow', 12.2],
-			            ['São Paulo', 12.0],
-			            ['Delhi', 11.7],
-			            ['Kinshasa', 11.5],
-			            ['Tianjin', 11.2],
-			            ['Lahore', 11.1],
-			            ['Jakarta', 10.6],
-			            ['Dongguan', 10.6],
-			            ['Lagos', 10.6],
-			            ['Bengaluru', 10.3],
-			            ['Seoul', 9.8],
-			            ['Foshan', 9.3],
-			            ['Tokyo', 9.3]
-			        ],
-			        dataLabels: {
-			            enabled: true,
-			            rotation: -90,
-			            color: '#FFFFFF',
-			            align: 'right',
-			            format: '{point.y:.1f}', // one decimal
-			            y: 10, // 10 pixels down from the top
-			            style: {
-			                fontSize: '13px',
-			                fontFamily: 'Verdana, sans-serif'
-			            }
-			        }
-			    }]
-			});
-		}
-		//end BarChart
 	}
-	//end function()
+	
+	//ajax = Success Barchart
+	function OnSuccessBarchart(data, categoryName) {
+		data = JSON.parse(data);
+		var result = [];
+		for(var i = 0; i < 20; i++){
+		    console.log(data[i].name);
+		    result.push([data[i].name, parseInt(data[i].weight / 10)]);
+		}
+		data = result;
+		//BarChart
+		Highcharts.chart(categoryName + '-barchart', {
+		    chart: {
+		        type: 'column'
+		    },
+		    title: {
+		        text: 'World\'s largest cities per 2017'
+		    },
+		    subtitle: {
+		        text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+		    },
+		    xAxis: {
+		        type: 'category',
+		        labels: {
+		            rotation: -45,
+		            style: {
+		                fontSize: '13px',
+		                fontFamily: 'Verdana, sans-serif'
+		            }
+		        }
+		    },
+		    yAxis: {
+		        min: 0,
+		        title: {
+		            text: '빈도수'
+		        }
+		    },
+		    legend: {
+		        enabled: false
+		    },
+		    tooltip: {
+		        pointFormat: '단어가 사용된 수: <b>{point.y:.1f}건</b>'
+		    },
+		    series: [{
+		        name: 'Population',
+		        data,
+		        dataLabels: {
+		            enabled: true,
+		            rotation: -90,
+		            color: '#FFFFFF',
+		            align: 'right',
+		            format: '{point.y:.1f}', // one decimal
+		            y: 10, // 10 pixels down from the top
+		            style: {
+		                fontSize: '13px',
+		                fontFamily: 'Verdana, sans-serif'
+		            }
+		        }
+		    }]
+		});
+	}
+	//end BarChart
+	 
 });
 $(function() {
 	$("input[name='select-chart']").click(function() {
@@ -428,7 +416,7 @@ $(function() {
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
 						    <form action="/results" method="GET" enctype="multipart/form-data">
-					      		<input class="textbox" name="search" placeholder="Search" type="text">
+					      		<input class="textbox" id="searchBox" name="search" placeholder="Search" type="text">
 					      		<input title="Search" value="" type="submit" class="button">
 					      	</form>
 						</div>
@@ -482,8 +470,8 @@ $(function() {
 			<input type="radio" id="society-radio-barchart" name="select-chart" value="society-radio-barchart">막대그래프
 				<h3>사회 카테고리</h3>
 		      	<figure class="highcharts-figure">
-				    <div id="society-wordcloud"></div>
-				    <div id="society-barchart"></div>
+				    <div id="society-wordcloud" style="height:600px;"></div>
+				    <div id="society-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>
@@ -495,8 +483,8 @@ $(function() {
 			<input type="radio" id="entertainment-radio-barchart" name="select-chart" value="entertainment-radio-barchart">막대그래프
 				<h3>연예 카테고리</h3>
 		      	<figure class="highcharts-figure">
-				    <div id="entertainment-wordcloud"></div>
-				    <div id="entertainment-barchart"></div>
+				    <div id="entertainment-wordcloud" style="height:600px;"></div>
+				    <div id="entertainment-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>
@@ -508,8 +496,8 @@ $(function() {
 			<input type="radio" id="economy-radio-barchart" name="select-chart" value="economy-radio-barchart">막대그래프
 				<h3>경제 카테고리</h3>
 		      	<figure class="highcharts-figure">
-				    <div id="economy-wordcloud"></div>
-				    <div id="economy-barchart"></div>
+				    <div id="economy-wordcloud" style="height:600px;"></div>
+				    <div id="economy-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>
@@ -521,8 +509,8 @@ $(function() {
 			<input type="radio" id="politics-radio-barchart" name="select-chart" value="politics-radio-barchart">막대그래프
 				<h3>정치 카테고리</h3>
 		      	<figure class="highcharts-figure">
-				    <div id="politics-wordcloud"></div>
-				    <div id="politics-barchart"></div>
+				    <div id="politics-wordcloud" style="height:600px;"></div>
+				    <div id="politics-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>
@@ -534,8 +522,8 @@ $(function() {
 			<input type="radio" id="sport-radio-barchart" name="select-chart" value="sport-radio-barchart">막대그래프
 				<h3>스포츠 카테고리</h3>
 		      	<figure class="highcharts-figure">
-				    <div id="sport-wordcloud"></div>
-				    <div id="sport-barchart"></div>
+				    <div id="sport-wordcloud" style="height:600px;"></div>
+				    <div id="sport-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>
@@ -547,8 +535,8 @@ $(function() {
 			<input type="radio" id="culture-radio-barchart" name="select-chart" value="culture-radio-barchart">막대그래프
 				<h3>문화 카테고리</h3>
 		      	<figure class="highcharts-figure">
-				    <div id="culture-wordcloud"></div>
-				    <div id="culture-barchart"></div>
+				    <div id="culture-wordcloud" style="height:600px;"></div>
+				    <div id="culture-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>
@@ -560,8 +548,8 @@ $(function() {
 			<input type="radio" id="global-radio-barchart" name="select-chart" value="global-radio-barchart">막대그래프
 				<h3>국제 카테고리</h3>
 		      	<figure class="highcharts-figure">
-				    <div id="global-wordcloud"></div>
-				    <div id="global-barchart"></div>
+				    <div id="global-wordcloud" style="height:600px;"></div>
+				    <div id="global-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>
@@ -573,8 +561,8 @@ $(function() {
 			<input type="radio" id="it-radio-barchart" name="select-chart" value="it-radio-barchart">막대그래프
 				<h3>IT 카테고리</h3>
 		      	<figure class="highcharts-figure">
-					<div id="it-wordcloud"></div>
-				    <div id="it-barchart"></div>
+					<div id="it-wordcloud" style="height:600px;"></div>
+				    <div id="it-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>

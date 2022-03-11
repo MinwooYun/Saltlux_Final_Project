@@ -38,8 +38,13 @@ public class UserService implements IUserService {
 
 
 	@Override
-	public List<MainDashBoardVO> getMainDashBoard(String category) {
-		return mapper.getMainDashBoard(category);
+	public List<MainDashBoardVO> getMainDashBoardWordcloud(String category) {
+		return mapper.getMainDashBoardWordcloud(category);
 	}
 
+
+	@Override
+	public List<RealtimeVO> getRealtimeTop() {
+		return mapper.getRealtimeTop();
+	}
 }
