@@ -104,13 +104,13 @@ import joptsimple.internal.Strings;
 
 public class testElasticSearch {
 
-	private String hostname = "final-project.es.us-central1.gcp.cloud.es.io"; // localhost
+	private String hostname = "https://saltlux-final.es.us-central1.gcp.cloud.es.io"; // localhost
 
 	private Integer port = 9243;
 
 	private String user = "elastic";
 	
-	private String password = "i8Fyr6KQKVDzBEjrZKKZZcii";
+	private String password = "9yXP7QiM4JXmWL0WiXBJCnPW";
 	
 	private String driver = "org.mariadb.jdbc.Driver";
 	
@@ -393,7 +393,7 @@ public class testElasticSearch {
 		searchRequest.source(sourceBuilder);
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
 		
-		ObjectMapper mapper = new ObjectMapper();
+//		ObjectMapper mapper = new ObjectMapper();
 		
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
 			result.add(hit.getSourceAsString());
@@ -519,7 +519,7 @@ public class testElasticSearch {
 	
 	}
 	
-//	@Test
+	@Test
 	public void autoCompletion() throws Exception {
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 
@@ -527,8 +527,8 @@ public class testElasticSearch {
 		
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-		MatchPhrasePrefixQueryBuilder matchPhrasePrefixQueryBuilder = new MatchPhrasePrefixQueryBuilder("word", "서울");
-		FuzzyQueryBuilder fuzzyQueryBuilder = new FuzzyQueryBuilder("word", "서울");
+		MatchPhrasePrefixQueryBuilder matchPhrasePrefixQueryBuilder = new MatchPhrasePrefixQueryBuilder("word", "서");
+		FuzzyQueryBuilder fuzzyQueryBuilder = new FuzzyQueryBuilder("word", "서");
 		
 		
 		QueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -538,10 +538,11 @@ public class testElasticSearch {
 		
 		sourceBuilder.query(queryBuilder);
 		searchRequest.source(sourceBuilder);
-		searchRequest.source().sort("_score");
+//		searchRequest.source().sort("_score");
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
 		
 //		ObjectMapper mapper = new ObjectMapper();
+//		System.out.println(searchResponse);
 		
 		List<Object> result = new ArrayList<>();
 		
@@ -553,7 +554,7 @@ public class testElasticSearch {
 	}
 	
 
-	@Test
+//	@Test
 	public void searchNews() throws Exception {
 		List<String> li = new ArrayList<>();
 		li.add("서울");

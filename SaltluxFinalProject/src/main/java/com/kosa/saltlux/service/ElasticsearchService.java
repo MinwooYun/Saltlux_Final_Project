@@ -40,13 +40,13 @@ import com.kosa.saltlux.config.ElasticSearchConfig;
 @Service
 public class ElasticsearchService {
 
-	private String hostname = "final-project.es.us-central1.gcp.cloud.es.io"; // localhost
+	private String hostname = "https://saltlux-final.es.us-central1.gcp.cloud.es.io"; // localhost
 
 	private Integer port = 9243;
 
 	private String user = "elastic";
 	
-	private String password = "i8Fyr6KQKVDzBEjrZKKZZcii";
+	private String password = "9yXP7QiM4JXmWL0WiXBJCnPW";
 	
 	private RestHighLevelClient restHighLevelClientSSLIgnore() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		
