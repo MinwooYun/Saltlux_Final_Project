@@ -201,7 +201,7 @@ $(function() {
 									</div>
 								</div>
 								<h5 class="font-weight-normal mt-3">
-									<a href="javascript:;">${news.title}</a>
+									<a class="myBtn_multi">${news.title}</a>
 								</h5>
 
 								<!-- Modal -->
