@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -122,7 +124,7 @@ label {
   font-size: 18px;
   display: block;
   float: left;
-  width: 10.8%;
+  width: 10.7%;
   padding: 1.0em;
   color: #757575;
   cursor: pointer;
@@ -179,6 +181,7 @@ label .fa {
   
   .tab_container {
     width: 100%;
+    text-align:center;
   }
 }
 
@@ -421,6 +424,94 @@ document.addEventListener("DOMContentLoadded", () => {
 		tabsContainer.querySelector(".tabs__sidebar .tabs__button").click();
 	});
 });
+
+$(document).ready(function(){
+	// Get the modal
+
+    var modalparent = document.getElementsByClassName("modal_multi");
+
+    // Get the button that opens the modal
+
+    var modal_btn_multi = document.getElementsByClassName("myBtn_multi");
+
+    // Get the <span> element that closes the modal
+    var span_close_multi = document.getElementsByClassName("close_multi");
+
+    // When the user clicks the button, open the modal
+    function setDataIndex() {
+
+        for (i = 0; i < modal_btn_multi.length; i++)
+        {
+            modal_btn_multi[i].setAttribute('data-index', i);
+            modalparent[i].setAttribute('data-index', i);
+            span_close_multi[i].setAttribute('data-index', i);
+        }
+    }
+
+
+
+    for (i = 0; i < modal_btn_multi.length; i++)
+    {
+        modal_btn_multi[i].onclick = function() {
+            var ElementIndex = this.getAttribute('data-index');
+            modalparent[ElementIndex].style.display = "block";
+        };
+
+        // When the user clicks on <span> (x), close the modal
+        span_close_multi[i].onclick = function() {
+            var ElementIndex = this.getAttribute('data-index');
+            modalparent[ElementIndex].style.display = "none";
+        };
+
+    }
+
+    window.onload = function() {
+
+        setDataIndex();
+    };
+
+    window.onclick = function(event) {
+        if (event.target === modalparent[event.target.getAttribute('data-index')]) {
+            modalparent[event.target.getAttribute('data-index')].style.display = "none";
+        }
+
+        // OLD CODE
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+
+//Get the modal
+
+    var modal = document.getElementById('myModal');
+
+//Get the button that opens the modal
+    var btn = document.getElementById("myBtn");
+
+//Get the <span> element that closes the modal
+    var span = modal.getElementsByClassName("close")[0]; // Modified by dsones uk
+
+//When the user clicks on the button, open the modal
+
+    btn.onclick = function() {
+
+        modal.style.display = "block";
+    }
+
+//When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+	
+	
+	$(".pagination a").on("click", function(e){
+		e.preventDefault();
+		moveForm.find("input[name='pageNum']").val($(this).attr("href"));
+		moveForm.attr("action", "/results");
+		moveForm.submit();
+		
+	});	
+});
 </script>
 
 </head>
@@ -428,7 +519,7 @@ document.addEventListener("DOMContentLoadded", () => {
 <body class="index-page bg-gray-200">
 
 	<header class="header-2">
-		<div class="page-header min-vh-75 relative" style="background-image: url('resources/assets/img/mainBG.jpg')">
+		<div class="page-header min-vh-75 relative" style="background-image: url('resources/assets/img/mainBG2.png')">
 			<span class="mask bg-gradient-primary opacity-0"></span>
 			<div class="container">
 				<div class="row">
@@ -447,7 +538,7 @@ document.addEventListener("DOMContentLoadded", () => {
 				<div class="row">
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
-						    <form action="/api/v1/news" method="GET" enctype="multipart/form-data">
+						    <form action="/news" method="GET" enctype="multipart/form-data">
 					      		<input class="textbox" id="searchBox" name="question" placeholder="Search" type="text">
 					      		<input type=hidden name="pageNum" value=1 >
 					      		<input title="Search" value="" type="submit" class="button">
@@ -458,41 +549,126 @@ document.addEventListener("DOMContentLoadded", () => {
 			</div>
 		</section>
 
-		<div>
-			<h1>오늘의 이슈</h1>
-			<div id="issueTabs" class="tabs">
+		<div style="margin-top:100px;">
+			<h1 style="color: black;">오늘의 이슈</h1>
+			<div id="issueTabs" class="tabs" style="margin-top:50px;">
 				<div class="tabs__sidebar">
-					<button class="tabs__button tabs__button--active" data-for-tab="1">Tab #1</button>
-					<button class="tabs__button" data-for-tab="2">Tab #2</button>
-					<button class="tabs__button" data-for-tab="3">Tab #3</button>
-					<button class="tabs__button" data-for-tab="4">Tab #4</button>
-					<button class="tabs__button" data-for-tab="5">Tab #5</button>
+					<c:forEach var="list" items="${newsList1}" begin="0" end="0">
+						<button class="tabs__button tabs__button--active" data-for-tab="1" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt1}건</p></button>
+					</c:forEach>
+					<c:forEach var="list" items="${newsList2}" begin="0" end="0">
+						<button class="tabs__button" data-for-tab="2" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt2}건</p></button>
+					</c:forEach>
+					<c:forEach var="list" items="${newsList3}" begin="0" end="0">
+						<button class="tabs__button" data-for-tab="3" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt3}건</p></button>
+					</c:forEach>
+					<c:forEach var="list" items="${newsList4}" begin="0" end="0">
+						<button class="tabs__button" data-for-tab="4" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt4}건</p></button>
+					</c:forEach>
+					<c:forEach var="list" items="${newsList5}" begin="0" end="0">
+						<button class="tabs__button" data-for-tab="5" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt5}건</p></button>
+					</c:forEach>
+
 				</div>
-				
 				<div id="tabs__content1" class="tabs__content tabs__content--active" data-tab="1">
 					<c:forEach items="${newsList1}" var="list" varStatus="status">
-						<p><h3>${list.title}</h3></p>
+						<c:choose>
+							<c:when test="${status.index==0}">
+								<div style="width:25%; float:left; text-align:center; display:inline-block;">
+									<img src="${list.imageURL}" style="width: 300px; height: 300px;">
+									<h4>${list.title}</h4>
+									"${fn:substring(list.contents,0,79)}"
+								</div>
+							</c:when>
+							<c:otherwise>
+								<div style="margin-left:300px; text-align:center; display:inline-block;">	
+								<h4>${list.title}</h4>
+								"${fn:substring(list.contents,0,79)}"
+								<br><br><br><br>
+								</div>	
+							</c:otherwise>
+						</c:choose>
 					</c:forEach>
 				</div>
 				
 				<div id="tabs__content2" class="tabs__content" data-tab="2">
 					<c:forEach items="${newsList2}" var="list" varStatus="status">
-						<p><h3>${list.title}</h3></p>
+						<c:choose>
+							<c:when test="${status.index==0}">
+								<div style="width:25%; float:left;">
+									<img src="${list.imageURL}" style="width: 350px; height: 350px; margin-right: 30px;">
+									<h4>${list.title}</h4>
+									"${fn:substring(list.contents,0,79)}"
+								</div>
+							</c:when>
+							<c:otherwise>
+								<div style="margin-left:500px;">	
+								<h4>${list.title}</h4>
+								"${fn:substring(list.contents,0,79)}"
+								<br><br><br><br>
+								</div>	
+							</c:otherwise>
+						</c:choose>
 					</c:forEach>
 				</div>
 				<div id="tabs__content3" class="tabs__content" data-tab="3">
 					<c:forEach items="${newsList3}" var="list" varStatus="status">
-						<p><h3>${list.title}</h3></p>
+						<c:choose>
+							<c:when test="${status.index==0}">
+								<div style="width:25%; float:left;">
+									<img src="${list.imageURL}" style="width: 350px; height: 350px; margin-right: 30px;">
+									<h4>${list.title}</h4>
+									"${fn:substring(list.contents,0,79)}"
+								</div>
+							</c:when>
+							<c:otherwise>
+								<div style="margin-left:500px;">	
+								<h4>${list.title}</h4>
+								"${fn:substring(list.contents,0,79)}"
+								<br><br><br><br>
+								</div>	
+							</c:otherwise>
+						</c:choose>
 					</c:forEach>
 				</div>
 				<div id="tabs__content4" class="tabs__content" data-tab="4">
 					<c:forEach items="${newsList4}" var="list" varStatus="status">
-						<p><h3>${list.title}</h3></p>
+						<c:choose>
+							<c:when test="${status.index==0}">
+								<div style="width:25%; float:left;">
+									<img src="${list.imageURL}" style="width: 350px; height: 350px; margin-right: 30px;">
+									<h4>${list.title}</h4>
+									"${fn:substring(list.contents,0,79)}"
+								</div>
+							</c:when>
+							<c:otherwise>
+								<div style="margin-left:500px;">	
+								<h4>${list.title}</h4>
+								"${fn:substring(list.contents,0,79)}"
+								<br><br><br><br>
+								</div>	
+							</c:otherwise>
+						</c:choose>
 					</c:forEach>
 				</div>
 				<div id="tabs__content5" class="tabs__content" data-tab="5">
 					<c:forEach items="${newsList5}" var="list" varStatus="status">
-						<p><h3>${list.title}</h3></p>
+						<c:choose>
+							<c:when test="${status.index==0}">
+								<div style="width:25%; float:left;">
+									<img src="${list.imageURL}" style="width: 350px; height: 350px; margin-right: 30px;">
+									<h4>${list.title}</h4>
+									"${fn:substring(list.contents,0,79)}"
+								</div>
+							</c:when>
+							<c:otherwise>
+								<div style="margin-left:500px;">	
+								<h4>${list.title}</h4>
+								"${fn:substring(list.contents,0,79)}"
+								<br><br><br><br>
+								</div>	
+							</c:otherwise>
+						</c:choose>
 					</c:forEach>
 				</div>
 			</div>

@@ -84,7 +84,7 @@
 		       BTF_RATIO as btfRatio 
 		from luxian.realtime
 		order by btf_ratio desc
-		limit 20;
+		limit 10;
 	</select>
 	
 	<!-- 

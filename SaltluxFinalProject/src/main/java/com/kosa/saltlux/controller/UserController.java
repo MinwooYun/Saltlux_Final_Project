@@ -94,12 +94,30 @@ public class UserController {
 		}
 		
 		System.out.println(newsList1);
+		
+		HashMap<Integer, Integer> map = new HashMap<>();
+		
+		for(ClusterVO vo : clusterList) {
+			map.put(vo.getClusterNum(), vo.getCnt());
+		}
+		
+		int cnt1 = map.get(1);
+		int cnt2 = map.get(2);
+		int cnt3 = map.get(3);
+		int cnt4 = map.get(4);
+		int cnt5 = map.get(5);
 	
 		model.addAttribute("newsList1", newsList1);
 		model.addAttribute("newsList2", newsList2);
 		model.addAttribute("newsList3", newsList3);
 		model.addAttribute("newsList4", newsList4);
 		model.addAttribute("newsList5", newsList5);
+		
+		model.addAttribute("cnt1", cnt1);
+		model.addAttribute("cnt2", cnt2);
+		model.addAttribute("cnt3", cnt3);
+		model.addAttribute("cnt4", cnt4);
+		model.addAttribute("cnt5", cnt5);
 		
 		return "home";
 	}
@@ -136,7 +154,6 @@ public class UserController {
 			model.addAttribute("search", search);
 			model.addAttribute("newsList", newsList);
 			
-			System.out.println(newsList);
 			
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -191,7 +208,7 @@ public class UserController {
 //	}
 	
 	@ResponseBody
-	@RequestMapping(value = version + "/risings")
+	@RequestMapping(value = "/risings")
 	public Object KeywordRisings(Model model) throws IOException {
 		List<RealtimeVO> realtimeList = userService.getRealtimeTop();
 		return realtimeList;

@@ -19,22 +19,23 @@ app = Flask(__name__)
 def get_refined_keyword():
 
     data = request.args.get('search')
+    print(data)
 
     # 사용자가 검색한 키워드
-    search_keyword = data.split('+')[0]
+    # search_keyword = data.split('+')[0]
 
     # 검색 결과 문서 리스트
-    doc_info_str = data.split('+')[1]
-    doc_info_list = json.loads(json.dumps(doc_info_str))
-    doc_info_list = ast.literal_eval(doc_info_list)
+    # doc_info_str = data.split('+')[1]
+    # doc_info_list = json.loads(json.dumps(doc_info_str))
+    # doc_info_list = ast.literal_eval(doc_info_list)
 
-    refined_data_list = get_preprocessed_keyword(search_keyword)
+    refined_data_list = get_preprocessed_keyword(str(data))
     print(refined_data_list)
 
-    # sample_doc_info = [{"nouns": '유엔 인권 여성 인권 보장 필요 유엔 여성 인권',"bm25":2.5}]
+    sample_doc_info = [{"nouns": '유엔 인권 여성 인권 보장 필요 유엔 여성 인권',"bm25":2.5}]
 
     associated_words_dic = get_total_co_occurrence(
-                                    doc_info_list=doc_info_list, 
+                                    doc_info_list=sample_doc_info, 
                                     search_text_list=refined_data_list,
                                     word_top_size=5,
                                     top_size=20

@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -120,7 +121,7 @@
 <script type="text/javascript">
 $(document).ready(function(){
 	$.ajax({
-		url : "api/v1/risings",
+		url : "/risings",
 		type : "POST",
 		data:{
 			
@@ -167,7 +168,7 @@ $(function() {
 				<div class="row">
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
-							<form action="/results" method="GET" enctype="multipart/form-data">
+							<form action="/news" method="GET" enctype="multipart/form-data">
 								<input class="textbox" id="searchBox" name="search" placeholder="Search" type="text" value="${search}"> 
 								<input title="Search" value="" type="submit" class="button">
 							</form>
@@ -179,14 +180,14 @@ $(function() {
 			<div class="leftContents">
 			<!-- contents -->
 					<div class="newsContents">
-				<c:forEach items="${newsList}" var="news" varStatus="status">
+				<c:forEach items="${newsList}" var="num" varStatus="status">
 				<c:if test="${status.index%3==0 }">
 					<div class="card-group">
 				</c:if>
 						<div class="card" data-animation="true" style="margin:10px; margin-bottom:50px;">
 							<div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
 								<a class="d-block blur-shadow-image" style="text-align: center;"> <img
-									src="${news.thumbnailUrl}" alt="img-blur-shadow" class="img-fluid shadow border-radius-lg" style="height:200px;">
+									src="${num.thumbnailUrl}" alt="img-blur-shadow" class="img-fluid shadow border-radius-lg" style="height:200px;">
 								</a>
 								<div class="colored-shadow"
 									style="background-image: url(&quot;https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg&quot;);"></div>
@@ -194,33 +195,38 @@ $(function() {
 							<div class="card-body text-center">
 								<div class="d-flex mt-n6 mx-auto">
 									<div style="width: 50%">
-										<h6 style="text-align: center;">${news.press}</h6>
+										<h6 style="text-align: center;">${num.press}</h6>
 									</div>
 									<div style="width: 50%">
-										<h6 style="text-align: center;">${news.newsDate}</h6>
+										<h6 style="text-align: center;">${num.newsDate}</h6>
 									</div>
 								</div>
 								<h5 class="font-weight-normal mt-3">
-									<a class="myBtn_multi">${news.title}</a>
+									<a class="myBtn_multi" href="javascript:;">${num.title}</a>
 								</h5>
-
+								<p style="font-size:11px">
+									${num.fragments} ...
+								</p>	
+							
 								<!-- Modal -->
-								<button class="myBtn_multi btn bg-gradient-primary w-auto me-2">자세히</button>
+
+
 								<!-- The Modal -->
 								<div class="modal modal_multi">
 									<!-- Modal content -->
-									<div class="modal-content">
+									<div class="modal-content" style="width:900px;">
 										
 										<div class="modal-header">
-											<h1>${news.title}</h1>
+											<h3>${num.title}</h3>
 											<span class="close close_multi">×</span>
 										</div>
 										<div class="modal-body">
-											<img src="${news.imageUrl}" style="width:600px; height:600px;">
-											<h3>${news.contents}</h3>
+											<img src="${num.imageUrl}" style="width:600px; height:600px;">
+											<% pageContext.setAttribute("replaceChar", "\n"); %>
+											<p style="text-align:left; line-height:250%; margin: 80px;">${fn:replace(num.contents, replaceChar, "<br/>")}</p>
 										</div>
 										<div class="modal-footer">
-									      	<h3>${news.press}</h3>
+									      	<h3>${num.press}</h3>
 									    </div>
 									</div>
 								</div>

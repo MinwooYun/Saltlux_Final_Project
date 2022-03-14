@@ -168,9 +168,9 @@ public class ElasticsearchService {
 		HighlightBuilder highlightBuilder = new HighlightBuilder();
 		
 		highlightBuilder.field("contents");
-		highlightBuilder.preTags("<b>");
-		highlightBuilder.postTags("</b>");
-		highlightBuilder.fragmentSize(30);
+		highlightBuilder.preTags("<strong>");
+		highlightBuilder.postTags("</strong>");
+		highlightBuilder.fragmentSize(80);
 		
 		sourceBuilder.fetchSource(fetchSourceContext);
 		sourceBuilder.highlighter(highlightBuilder);
@@ -201,7 +201,7 @@ public class ElasticsearchService {
 			else {
 				map.put("fragments", " ");
 			}
-			
+			System.out.println(map);
 			result.add(map);
 			
 		}
