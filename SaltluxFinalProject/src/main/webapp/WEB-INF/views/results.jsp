@@ -179,14 +179,14 @@ $(function() {
 			<div class="leftContents">
 			<!-- contents -->
 					<div class="newsContents">
-				<c:forEach items="${newsList}" var="num" varStatus="status">
+				<c:forEach items="${newsList}" var="news" varStatus="status">
 				<c:if test="${status.index%3==0 }">
 					<div class="card-group">
 				</c:if>
 						<div class="card" data-animation="true" style="margin:10px; margin-bottom:50px;">
 							<div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
 								<a class="d-block blur-shadow-image" style="text-align: center;"> <img
-									src="${num.thumbnailURL}" alt="img-blur-shadow" class="img-fluid shadow border-radius-lg" style="height:200px;">
+									src="${news.thumbnailUrl}" alt="img-blur-shadow" class="img-fluid shadow border-radius-lg" style="height:200px;">
 								</a>
 								<div class="colored-shadow"
 									style="background-image: url(&quot;https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg&quot;);"></div>
@@ -194,14 +194,14 @@ $(function() {
 							<div class="card-body text-center">
 								<div class="d-flex mt-n6 mx-auto">
 									<div style="width: 50%">
-										<h6 style="text-align: center;">${num.press}</h6>
+										<h6 style="text-align: center;">${news.press}</h6>
 									</div>
 									<div style="width: 50%">
-										<h6 style="text-align: center;">${num.newsDate}</h6>
+										<h6 style="text-align: center;">${news.newsDate}</h6>
 									</div>
 								</div>
 								<h5 class="font-weight-normal mt-3">
-									<a href="javascript:;">${num.title}</a>
+									<a href="javascript:;">${news.title}</a>
 								</h5>
 
 								<!-- Modal -->
@@ -212,15 +212,15 @@ $(function() {
 									<div class="modal-content">
 										
 										<div class="modal-header">
-											<h1>${num.title}</h1>
+											<h1>${news.title}</h1>
 											<span class="close close_multi">×</span>
 										</div>
 										<div class="modal-body">
-											<img src="${num.imageURL}" style="width:600px; height:600px;">
-											<h3>${num.contents}</h3>
+											<img src="${news.imageUrl}" style="width:600px; height:600px;">
+											<h3>${news.contents}</h3>
 										</div>
 										<div class="modal-footer">
-									      	<h3>${num.press}</h3>
+									      	<h3>${news.press}</h3>
 									    </div>
 									</div>
 								</div>

@@ -447,8 +447,9 @@ document.addEventListener("DOMContentLoadded", () => {
 				<div class="row">
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
-						    <form action="/results" method="GET" enctype="multipart/form-data">
-					      		<input class="textbox" id="searchBox" name="search" placeholder="Search" type="text">
+						    <form action="/api/v1/news" method="GET" enctype="multipart/form-data">
+					      		<input class="textbox" id="searchBox" name="question" placeholder="Search" type="text">
+					      		<input type=hidden name="pageNum" value=1 >
 					      		<input title="Search" value="" type="submit" class="button">
 					      	</form>
 						</div>
