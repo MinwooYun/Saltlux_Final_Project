@@ -14,13 +14,15 @@
 	<!-- Nucleo Icons -->
 	<link href="resources/assets/css/nucleo-icons.css" rel="stylesheet" />
 	<link href="resources/assets/css/nucleo-svg.css" rel="stylesheet" />
+	<link rel="stylesheet" href="resources/assets/css/master.css">
 
 	<!-- Material Icons -->
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">	
 	<!-- Font Awesome Icons -->
-	<script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+	<script src="https://kit.fontawesome.com/c1ecb15d05.js" crossorigin="anonymous"></script>
 	<!-- CSS Files -->
 	<link id="pagestyle" href="resources/assets/css/material-kit.css?v=3.0.0" rel="stylesheet" />	
+	<link rel="stylesheet" href="resources/assets/css/material-kit.css">
 	
 	<!-- WordCloud BarChart -->
 	<script src="https://code.highcharts.com/highcharts.js"></script>
@@ -35,16 +37,13 @@
 	.leftContents {
 		height:auto; 
 		width:80%; 
-		border:1px solid orange; 
 		float:left; 
-		padding:100px 80px;
+		padding:100px 20px;
 	}
 	.newsContents {
 		float : center;
 		padding : 30px 10px;
 		margin : auto;
-		border : 1px solid blue;
-		height : 500px;
 	}
 	.newsContentsList {
 		padding-left : 50px;
@@ -119,14 +118,32 @@
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
 <script type="text/javascript">
+$(document).ready(function(){
+	$.ajax({
+		url : "api/v1/risings",
+		type : "POST",
+		data:{
+			
+		},
+		success: function(data){
+			for(i=0; i<data.length; i++){
+                    $("#rightKeyword").append("<p><h4>" + (i+1) + ". " + data[i].keyword + "</h4></p>");
+               }
+		},
+		error : function(e) {
+			console.log("ERROR:", e);
+			alert("fail");
+		}
+	})
+});
 $(function() {
 	$("#searchBox").autocomplete({
 		source : function(request, response) {
 			$.ajax({
-				url : "autocomplete",
+				url : "api/v1/autocomplete",
 				dataType : "jsonp",
-				data : {
-					term : request.term
+				data: {
+					term: request.term
 				},
 				success : function(data) {
 					response(data.words);
@@ -134,8 +151,6 @@ $(function() {
 			});
 		}
 	});
-	
-	
 });
 </script>
 
@@ -152,11 +167,9 @@ $(function() {
 				<div class="row">
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
-							<form action="/results" method="GET"
-								enctype="multipart/form-data">
-								<input class="textbox" id="searchBox" name="search"
-									placeholder="Search" type="text"> <input title="Search"
-									value="" type="submit" class="button">
+							<form action="/results" method="GET" enctype="multipart/form-data">
+								<input class="textbox" id="searchBox" name="search" placeholder="Search" type="text" value="${search}"> 
+								<input title="Search" value="" type="submit" class="button">
 							</form>
 						</div>
 					</div>
@@ -164,101 +177,62 @@ $(function() {
 			</div>
 
 			<div class="leftContents">
-				<div class="newsContents">
+			<!-- contents -->
+					<div class="newsContents">
+				<c:forEach items="${newsList}" var="num" varStatus="status">
+				<c:if test="${status.index%3==0 }">
 					<div class="card-group">
-						<div class="card" data-animation="true">
-							<div
-								class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-								<a class="d-block blur-shadow-image"> <img
-									src="https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg"
-									alt="img-blur-shadow" class="img-fluid shadow border-radius-lg">
+				</c:if>
+						<div class="card" data-animation="true" style="margin:10px; margin-bottom:50px;">
+							<div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+								<a class="d-block blur-shadow-image" style="text-align: center;"> <img
+									src="${num.thumbnailURL}" alt="img-blur-shadow" class="img-fluid shadow border-radius-lg" style="height:200px;">
 								</a>
 								<div class="colored-shadow"
 									style="background-image: url(&quot;https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg&quot;);"></div>
 							</div>
 							<div class="card-body text-center">
 								<div class="d-flex mt-n6 mx-auto">
-									<a class="btn btn-link text-primary ms-auto border-0"
-										data-bs-toggle="tooltip" data-bs-placement="bottom"
-										title="Refresh"> <i class="material-icons text-lg">refresh</i>
-									</a>
-									<button class="btn btn-link text-info me-auto border-0"
-										data-bs-toggle="tooltip" data-bs-placement="bottom"
-										title="Edit">
-										<i class="material-icons text-lg">edit</i>
-									</button>
+									<div style="width: 50%">
+										<h6 style="text-align: center;">${num.press}</h6>
+									</div>
+									<div style="width: 50%">
+										<h6 style="text-align: center;">${num.newsDate}</h6>
+									</div>
 								</div>
 								<h5 class="font-weight-normal mt-3">
-									<a href="javascript:;">Cozy 5 Stars Apartment</a>
+									<a href="javascript:;">${num.title}</a>
 								</h5>
-								<p class="mb-0">The place is close to Barceloneta Beach and
-									bus stop just 2 min by walk and near to "Naviglio" where you
-									can enjoy the main night life in Barcelona.</p>
-							</div>
-						</div>
-						<div class="card" data-animation="true">
-							<div
-								class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-								<a class="d-block blur-shadow-image"> <img
-									src="https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg"
-									alt="img-blur-shadow" class="img-fluid shadow border-radius-lg">
-								</a>
-								<div class="colored-shadow"
-									style="background-image: url(&quot;https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg&quot;);"></div>
-							</div>
-							<div class="card-body text-center">
-								<div class="d-flex mt-n6 mx-auto">
-									<a class="btn btn-link text-primary ms-auto border-0"
-										data-bs-toggle="tooltip" data-bs-placement="bottom"
-										title="Refresh"> <i class="material-icons text-lg">refresh</i>
-									</a>
-									<button class="btn btn-link text-info me-auto border-0"
-										data-bs-toggle="tooltip" data-bs-placement="bottom"
-										title="Edit">
-										<i class="material-icons text-lg">edit</i>
-									</button>
+
+								<!-- Modal -->
+								<button class="myBtn_multi btn bg-gradient-primary w-auto me-2">자세히</button>
+								<!-- The Modal -->
+								<div class="modal modal_multi">
+									<!-- Modal content -->
+									<div class="modal-content">
+										
+										<div class="modal-header">
+											<h1>${num.title}</h1>
+											<span class="close close_multi">×</span>
+										</div>
+										<div class="modal-body">
+											<img src="${num.imageURL}" style="width:600px; height:600px;">
+											<h3>${num.contents}</h3>
+										</div>
+										<div class="modal-footer">
+									      	<h3>${num.press}</h3>
+									    </div>
+									</div>
 								</div>
-								<h5 class="font-weight-normal mt-3">
-									<a href="javascript:;">Cozy 5 Stars Apartment</a>
-								</h5>
-								<p class="mb-0">The place is close to Barceloneta Beach and
-									bus stop just 2 min by walk and near to "Naviglio" where you
-									can enjoy the main night life in Barcelona.</p>
+								<!-- end Modal -->
 							</div>
 						</div>
-						<div class="card" data-animation="true">
-							<div
-								class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-								<a class="d-block blur-shadow-image"> <img
-									src="https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg"
-									alt="img-blur-shadow" class="img-fluid shadow border-radius-lg">
-								</a>
-								<div class="colored-shadow"
-									style="background-image: url(&quot;https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg&quot;);"></div>
-							</div>
-							<div class="card-body text-center">
-								<div class="d-flex mt-n6 mx-auto">
-									<a class="btn btn-link text-primary ms-auto border-0"
-										data-bs-toggle="tooltip" data-bs-placement="bottom"
-										title="Refresh"> <i class="material-icons text-lg">refresh</i>
-									</a>
-									<button class="btn btn-link text-info me-auto border-0"
-										data-bs-toggle="tooltip" data-bs-placement="bottom"
-										title="Edit">
-										<i class="material-icons text-lg">edit</i>
-									</button>
-								</div>
-								<h5 class="font-weight-normal mt-3">
-									<a href="javascript:;">Cozy 5 Stars Apartment</a>
-								</h5>
-								<p class="mb-0">The place is close to Barceloneta Beach and
-									bus stop just 2 min by walk and near to "Naviglio" where you
-									can enjoy the main night life in Barcelona.</p>
-							</div>
-						</div>
+				<c:if test="${status.index%3==2 || status.last }">
 					</div>
+				</c:if>
+				</c:forEach>
 				</div>
-				<br>
+				<!-- /end contents -->
 				
 				<!-- 페이징 -->
 				<div class="row justify-space-between py-2">
@@ -269,7 +243,7 @@ $(function() {
 								<li class="page-item"><a class="material-icons"
 									href="${pageMaker.startPage-1}">Previous</a></li>
 							</c:if>
-	
+
 							<!-- 각 번호 페이지 버튼 -->
 							<c:forEach var="num" begin="${pageMaker.startPage}"
 								end="${pageMaker.endPage}">
@@ -277,7 +251,7 @@ $(function() {
 									class="page-link"
 									href="localhost:8080/result?search=${search}&page=${num}">${num}</a></li>
 							</c:forEach>
-	
+
 							<!-- 다음페이지 버튼 -->
 							<c:if test="${pageMaker.next}">
 								<li class="page-item"><a class="material-icons"
@@ -286,10 +260,14 @@ $(function() {
 						</ul>
 					</div>
 				</div>
-				
+
 			</div>
 
-			<div style="height: 500px; width: 20%; border: 1px solid green; float: right;">
+			<div id="rightContents" style="width: 20%; float: right; padding:100px 20px;">
+				<div id="rightKeyword" style="text-align: center;">
+					
+				</div>
+				<i class="fa-solid fa-1"></i>
 			</div>
 
 			<form id="moveForm" method="get">
@@ -303,9 +281,89 @@ $(function() {
 		</section>
 	</div>
 	<jsp:include page="../views/include/footer.jsp"></jsp:include>
+
+
 	
 <script>
 $(document).ready(function(){
+	// Get the modal
+
+    var modalparent = document.getElementsByClassName("modal_multi");
+
+    // Get the button that opens the modal
+
+    var modal_btn_multi = document.getElementsByClassName("myBtn_multi");
+
+    // Get the <span> element that closes the modal
+    var span_close_multi = document.getElementsByClassName("close_multi");
+
+    // When the user clicks the button, open the modal
+    function setDataIndex() {
+
+        for (i = 0; i < modal_btn_multi.length; i++)
+        {
+            modal_btn_multi[i].setAttribute('data-index', i);
+            modalparent[i].setAttribute('data-index', i);
+            span_close_multi[i].setAttribute('data-index', i);
+        }
+    }
+
+
+
+    for (i = 0; i < modal_btn_multi.length; i++)
+    {
+        modal_btn_multi[i].onclick = function() {
+            var ElementIndex = this.getAttribute('data-index');
+            modalparent[ElementIndex].style.display = "block";
+        };
+
+        // When the user clicks on <span> (x), close the modal
+        span_close_multi[i].onclick = function() {
+            var ElementIndex = this.getAttribute('data-index');
+            modalparent[ElementIndex].style.display = "none";
+        };
+
+    }
+
+    window.onload = function() {
+
+        setDataIndex();
+    };
+
+    window.onclick = function(event) {
+        if (event.target === modalparent[event.target.getAttribute('data-index')]) {
+            modalparent[event.target.getAttribute('data-index')].style.display = "none";
+        }
+
+        // OLD CODE
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+
+//Get the modal
+
+    var modal = document.getElementById('myModal');
+
+//Get the button that opens the modal
+    var btn = document.getElementById("myBtn");
+
+//Get the <span> element that closes the modal
+    var span = modal.getElementsByClassName("close")[0]; // Modified by dsones uk
+
+//When the user clicks on the button, open the modal
+
+    btn.onclick = function() {
+
+        modal.style.display = "block";
+    }
+
+//When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+	
+	
 	$(".pagination a").on("click", function(e){
 		e.preventDefault();
 		moveForm.find("input[name='pageNum']").val($(this).attr("href"));

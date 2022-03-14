@@ -13,11 +13,6 @@
 		<result column="NOUNS" property="nouns" />
 	</resultMap>
 	
-	<resultMap type="com.kosa.saltlux.vo.RealtimeVO" id="RealtimeMap">
-		<result column="KEYWORD" property="keyword" />
-		<result column="BTFRATIO" property="btfRatio" />
-	</resultMap>
-	
 	<resultMap type="com.kosa.saltlux.vo.MainDashBoardVO" id="MainDashBoardMap">
 		<result column="KEYWORD" property="keyword" />
 		<result column="CATEGORY" property="category" />
@@ -27,6 +22,12 @@
 	<resultMap type="com.kosa.saltlux.vo.RealtimeVO" id="RealtimeMap">
 		<result column="KEYWORD" property="keyword" />
 		<result column="BTF_RATIO" property="btfRatio" />
+	</resultMap>
+	
+	<resultMap type="com.kosa.saltlux.vo.ClusterVO" id="ClusterMap">
+		<result column="CLUSTER_NUM" property="clusterNum" />
+		<result column="ARTICLE_INDEX" property="articleIndex" />
+		<result column="CNT" property="cnt" />
 	</resultMap>
 	
 	<select id="getPageTotal" resultType="int">
@@ -44,7 +45,7 @@
 			   NEWS_DATE AS newsDate,
 			   NOUNS AS nouns 
 		FROM luxian.NEWS
-		limit 10;
+		limit 9;
 	</select>
 	
 	<select id="getDB" resultType="com.kosa.saltlux.vo.NewsVO">
@@ -61,31 +62,56 @@
 		limit #{cnt}, 10;
 	</select>
 	
-	<select id="getMainDashBoardWordcloud" resultType="com.kosa.saltlux.vo.MainDashBoardVO">
+	<select id="getMainDashBoardChart" resultType="com.kosa.saltlux.vo.MainDashBoardVO">
 		select KEYWORD  AS keyword
 			  ,CATEGORY AS category
 			  ,BTF      AS btf
 		from luxian.maindashboard
-		where category = #{category}
+		<if test="category != '전체'">
+    		where category = #{category}
+    	</if>
 		order by btf desc
 		limit 70;
 	</select>
 	
-	<select id="getMainDashBoardWordcloud" resultType="com.kosa.saltlux.vo.MainDashBoardVO">
-		select KEYWORD  AS keyword
-			  ,CATEGORY AS category
-			  ,BTF      AS btf
-		from luxian.maindashboard
-		where category = #{category}
-		order by btf desc
-		limit 70;
-	</select>
-	
+	<!--  
+	결과페이지 급상승키워드 Top N개 조회
+	DB : REALTIME
+	ID : getRealtimeTop
+	-->
 	<select id="getRealtimeTop" resultType="com.kosa.saltlux.vo.RealtimeVO">
-		select KEYWORD   as keword,
-		       BTF_RATIO as btf_ratio 
+		select KEYWORD   as keyword,
+		       BTF_RATIO as btfRatio 
 		from luxian.realtime
 		order by btf_ratio desc
-		limit 10;
+		limit 20;
+	</select>
+	
+	<!-- 
+	오늘의 이슈 뉴스리스트 
+	DB : CLUSTER
+	ID : getTodayIssue
+	 -->
+	<select id="getTodayIssue" resultType="com.kosa.saltlux.vo.ClusterVO">
+		select CLUSTER_NUM   as clusterNum,
+		       ARTICLE_INDEX as articleIndex, 
+		       CNT           as cnt
+		from luxian.cluster
+		order by cluster_num
+	</select>
+	
+	
+	<select id="getTodayNews" resultType="com.kosa.saltlux.vo.NewsVO">
+	SELECT NEWS_NO AS newsNo,
+		   TITLE AS title,
+		   CONTENTS AS contents,
+		   IMAGE_URL AS imageURL,
+		   THUMBNAIL_URL AS thumbnailURL,
+		   PRESS AS press,
+		   CATEGORY AS category,
+		   NEWS_DATE AS newsDate,
+		   NOUNS AS nouns 
+	FROM luxian.NEWS
+	where news_no = #{index}
 	</select>
 </mapper>

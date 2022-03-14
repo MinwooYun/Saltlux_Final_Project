@@ -2,6 +2,7 @@ package com.kosa.saltlux.service;
 
 import java.util.List;
 
+import com.kosa.saltlux.vo.ClusterVO;
 import com.kosa.saltlux.vo.CriteriaVO;
 import com.kosa.saltlux.vo.MainDashBoardVO;
 import com.kosa.saltlux.vo.NewsVO;
@@ -17,9 +18,15 @@ public interface IUserService {
 //	mariaDB 데이터 조회
 	List<NewsVO> getDB(int cnt);
 	
-//	GET 메인페이지 대시보드의 Wordcloud
-	List<MainDashBoardVO> getMainDashBoardWordcloud(String category);
+//	GET 메인페이지 대시보드의 Wordcloud, Barchart
+	List<MainDashBoardVO> getMainDashBoardChart(String category);
 	
 //	GET 결과페이지 Top 10
 	List<RealtimeVO> getRealtimeTop();
+	
+//	GET 오늘의 이슈 리스트
+	List<ClusterVO> getTodayIssue();
+	
+//	GET 오늘의 이슈 뉴스 리스트
+	NewsVO getTodayNews(int index);
 }

@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -17,6 +18,7 @@
 	<!-- Nucleo Icons -->
 	<link href="resources/assets/css/nucleo-icons.css" rel="stylesheet" />
 	<link href="resources/assets/css/nucleo-svg.css" rel="stylesheet" />
+	<link rel="stylesheet" href="resources/assets/css/material-kit.css">
 
 	<!-- Material Icons -->
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">	
@@ -24,7 +26,8 @@
 	<script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 	<!-- CSS Files -->
 	<link id="pagestyle" href="resources/assets/css/material-kit.css?v=3.0.0" rel="stylesheet" />	
-	
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+	<link rel="stylesheet" href="resources/assets/css/master.css">
 	<!-- WordCloud BarChart -->
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<script src="https://code.highcharts.com/modules/wordcloud.js"></script>
@@ -33,6 +36,9 @@
 	<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 	
 	<link href="https://code.jquery.com/ui/1.13.0/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+	
+	<!-- Core -->
+	<script src="resources/assets/js/core/popper.min.js"></script>
 	
 	
 <style>
@@ -241,7 +247,6 @@ label .fa {
     background: #f1f7ff;
 }
 /*end WordCloud*/
-
 </style>
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
@@ -250,7 +255,7 @@ $(function() {
 	 $( "#searchBox" ).autocomplete({
 	    	source: function( request, response ) {
 				$.ajax( {
-					url: "autocomplete",
+					url: "api/v1/autocomplete",
 					dataType: "jsonp",
 					data: {
 						term: request.term
@@ -327,7 +332,7 @@ $(function() {
 		        type: 'column'
 		    },
 		    title: {
-		        text: 'World\'s largest cities per 2017'
+		        text: '키워드별 BTF 순위'
 		    },
 		    subtitle: {
 		        text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
@@ -372,8 +377,7 @@ $(function() {
 		    }]
 		});
 	}
-	//end BarChart
-	 
+	//end BarChart 
 });
 $(function() {
 	$("input[name='select-chart']").click(function() {
@@ -389,6 +393,34 @@ $(function() {
 	    }
 	});
 });	
+
+$(function setupTabs() {
+	document.querySelectorAll(".tabs__button").forEach(button => {
+		button.addEventListener("click", () => {
+			const sideBar = button.parentElement;
+			const tabsContainer = sideBar.parentElement;
+			const tabNumber = button.dataset.forTab;
+			const tabToActivate = tabsContainer.querySelector('.tabs__content[data-tab="' + tabNumber + '"]');
+			
+			sideBar.querySelectorAll(".tabs__button").forEach(button => {
+				button.classList.remove("tabs__button--active");
+			});
+				
+			tabsContainer.querySelectorAll(".tabs__content").forEach(button => {
+				button.classList.remove("tabs__content--active");
+			});
+			
+			button.classList.add("tabs__button--active");
+            tabToActivate.classList.add("tabs__content--active");		
+		});
+	});
+});
+document.addEventListener("DOMContentLoadded", () => {
+	setupTabs();
+	document.querySelectorAll(".tabs").forEach(tabsContainer =>{
+		tabsContainer.querySelector(".tabs__sidebar .tabs__button").click();
+	});
+});
 </script>
 
 </head>
@@ -424,6 +456,47 @@ $(function() {
 				</div>
 			</div>
 		</section>
+
+		<div>
+			<h1>오늘의 이슈</h1>
+			<div id="issueTabs" class="tabs">
+				<div class="tabs__sidebar">
+					<button class="tabs__button tabs__button--active" data-for-tab="1">Tab #1</button>
+					<button class="tabs__button" data-for-tab="2">Tab #2</button>
+					<button class="tabs__button" data-for-tab="3">Tab #3</button>
+					<button class="tabs__button" data-for-tab="4">Tab #4</button>
+					<button class="tabs__button" data-for-tab="5">Tab #5</button>
+				</div>
+				
+				<div id="tabs__content1" class="tabs__content tabs__content--active" data-tab="1">
+					<c:forEach items="${newsList1}" var="list" varStatus="status">
+						<p><h3>${list.title}</h3></p>
+					</c:forEach>
+				</div>
+				
+				<div id="tabs__content2" class="tabs__content" data-tab="2">
+					<c:forEach items="${newsList2}" var="list" varStatus="status">
+						<p><h3>${list.title}</h3></p>
+					</c:forEach>
+				</div>
+				<div id="tabs__content3" class="tabs__content" data-tab="3">
+					<c:forEach items="${newsList3}" var="list" varStatus="status">
+						<p><h3>${list.title}</h3></p>
+					</c:forEach>
+				</div>
+				<div id="tabs__content4" class="tabs__content" data-tab="4">
+					<c:forEach items="${newsList4}" var="list" varStatus="status">
+						<p><h3>${list.title}</h3></p>
+					</c:forEach>
+				</div>
+				<div id="tabs__content5" class="tabs__content" data-tab="5">
+					<c:forEach items="${newsList5}" var="list" varStatus="status">
+						<p><h3>${list.title}</h3></p>
+					</c:forEach>
+				</div>
+			</div>
+		</div>
+
 		<div class="tab_container">
 			<input id="tab1" type="radio" name="cateogryName" class="input_style" value="all">
 			<label for="tab1" id="전체"><i class="fa fa-circle-o-notch"></i><br><span>전체</span></label>
@@ -457,8 +530,8 @@ $(function() {
 			<input type="radio" id="all-radio-barchart" name="select-chart" value="all-radio-barchart">막대그래프
 				<h3>전체 카테고리</h3>
 		      	<figure class="highcharts-figure">
-				    <div id="all-wordcloud"></div>
-				    <div id="all-barchart"></div>
+				    <div id="all-wordcloud" style="height:600px;"></div>
+				    <div id="all-barchart" style="height:700px;"></div>
 				    <p class="highcharts-description">
 			        	카테고리의 워드클라우드 설명글
 				    </p>

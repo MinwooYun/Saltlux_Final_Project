@@ -28,11 +28,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.kosa.saltlux.HomeController;
 import com.kosa.saltlux.service.IUserService;
+import com.kosa.saltlux.vo.ClusterVO;
 import com.kosa.saltlux.vo.CriteriaVO;
 import com.kosa.saltlux.vo.MainDashBoardVO;
 import com.kosa.saltlux.vo.NewsVO;
+import com.kosa.saltlux.vo.RealtimeVO;
 
 @Controller
 public class UserController {
@@ -40,16 +44,62 @@ public class UserController {
 	@Autowired
 	IUserService userService;
 	
-	public static final String version = "/api/v1/";
+	public static final String version = "/api/v1";
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-	
-	/**
-	 * Simply selects the home view to render by returning its name.
-	 */
+
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(Locale locale, Model model) {
-		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		List<ClusterVO> clusterList = userService.getTodayIssue();
+		List<Integer> index = new ArrayList<>();
+		
+		for(ClusterVO vo: clusterList) {
+			String[] data = vo.getArticleIndex().split(" ");
+			for(int i = 0; i < 5; i++) {
+				index.add(Integer.parseInt(data[i]));
+			}
+		}
+
+		List<NewsVO> newsList1 = new ArrayList<>();
+		List<NewsVO> newsList2 = new ArrayList<>();
+		List<NewsVO> newsList3 = new ArrayList<>();
+		List<NewsVO> newsList4 = new ArrayList<>();
+		List<NewsVO> newsList5 = new ArrayList<>();
+
+
+		for(int i = 0; i < 5; i++) {
+			NewsVO data = userService.getTodayNews(index.get(i));
+			newsList1.add(data);
+		}
+
+		for(int i = 5; i < 10; i++) {
+			NewsVO data = userService.getTodayNews(index.get(i));
+			newsList2.add(data);
+		}
+
+		for(int i = 10; i < 15; i++) {
+			NewsVO data = userService.getTodayNews(index.get(i));
+			newsList3.add(data);
+		}
+
+		for(int i = 15; i < 20; i++) {
+			NewsVO data = userService.getTodayNews(index.get(i));
+			newsList4.add(data);
+		}
+
+		for(int i = 20; i < 25; i++) {
+			NewsVO data = userService.getTodayNews(index.get(i));
+			newsList5.add(data);
+		}
+		
+		System.out.println(newsList1);
+	
+		model.addAttribute("newsList1", newsList1);
+		model.addAttribute("newsList2", newsList2);
+		model.addAttribute("newsList3", newsList3);
+		model.addAttribute("newsList4", newsList4);
+		model.addAttribute("newsList5", newsList5);
 		
 		return "home";
 	}
@@ -80,8 +130,13 @@ public class UserController {
 			model.addAttribute("reqResult", data);
 			List<NewsVO> newsList = userService.getNews(cri);
 			
+			int page = 20;
+			
+			model.addAttribute("page", page);
 			model.addAttribute("search", search);
 			model.addAttribute("newsList", newsList);
+			
+			System.out.println(newsList);
 			
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -97,9 +152,9 @@ public class UserController {
 	 * @return jsonList.toString()
 	 */
 	@ResponseBody
-	@RequestMapping(value = version + "main-board/dash-board/chart/{categoryName}", method = RequestMethod.POST, produces = "application/text; charset=UTF-8")
-	public String MainDashBoardWordcloud(@PathVariable String categoryName, Model model) {
-		List<MainDashBoardVO> mainDashBoardList = userService.getMainDashBoardWordcloud(categoryName);
+	@RequestMapping(value = version + "/main-board/dash-board/chart/{categoryName}", method = RequestMethod.POST, produces = "application/text; charset=UTF-8")
+	public String MainDashBoardChart(@PathVariable String categoryName, Model model) {
+		List<MainDashBoardVO> mainDashBoardList = userService.getMainDashBoardChart(categoryName);
 		Map<String, Object> map = new HashMap<>();
 		List<JSONObject> jsonList = new ArrayList<>();
 		
@@ -126,12 +181,19 @@ public class UserController {
 		return jsonList.toString();
 	}
 	
-	@GetMapping(value = "/autocomplete")
-	public String autocomplete(Model model, @RequestParam final String term) throws IOException {
+	@GetMapping(value = version + "/autocomplete")
+	public String Autocomplete(Model model, @RequestParam final String term) throws IOException {
 
 		model.addAttribute("words", Arrays.asList("Saltlux", "솔트룩스", term));
 		
 		return "jsonView";
 		
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = version + "/risings")
+	public Object KeywordRisings(Model model) throws IOException {
+		List<RealtimeVO> realtimeList = userService.getRealtimeTop();
+		return realtimeList;
 	}
 }
