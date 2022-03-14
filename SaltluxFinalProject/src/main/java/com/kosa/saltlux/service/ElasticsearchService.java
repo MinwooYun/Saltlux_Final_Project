@@ -89,24 +89,46 @@ public class ElasticsearchService {
 
 	}
 
-	public List<Object> autoCompletion(String word) throws Exception {
-
-		SearchRequest searchRequest = new SearchRequest("test");
+	// 자동완성
+	public List<Object> autoCompletion(String term) throws Exception {
 		
+		/**
+		 * @author Juhui Park
+		 * 
+		 * 자동완성 기능
+		 * 
+		 * @param term
+		 * @return : List<Object> result, Object 개수 : 10
+		 * 
+		 * 
+		 */
+		
+		
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+
+		List<Object> result = new ArrayList<>();
+		
+		SearchRequest searchRequest = new SearchRequest("auto_completion");
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-		MatchPhrasePrefixQueryBuilder matchPhrasePrefixQueryBuilder = new MatchPhrasePrefixQueryBuilder("keyword", word);
-		FuzzyQueryBuilder fuzzyQueryBuilder = new FuzzyQueryBuilder("keyword", word);
+		MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("search_terms.edgengram", term);
 		
-		QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.minimumShouldMatch(1)
-				.should(fuzzyQueryBuilder)
-				.should(matchPhrasePrefixQueryBuilder);
+		sourceBuilder.query(matchQueryBuilder);
+		sourceBuilder.size(10);
 		
-		sourceBuilder.query(queryBuilder);
 		searchRequest.source(sourceBuilder);
-		SearchResponse searchResponse = restHighLevelClientSSLIgnore().search(searchRequest, RequestOptions.DEFAULT);
 		
+		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
+
+	
+		for (SearchHit hit : searchResponse.getHits().getHits()) {
+			if (!result.containsAll(hit.getSourceAsMap().values())) {
+				result.addAll(hit.getSourceAsMap().values());
+			}
+		}
+		
+		System.out.println(result);
+		return result;
+	}
 	
 	// news 기사 조회
 	public List<Object> searchNews(String question, int pageNum) throws Exception {
