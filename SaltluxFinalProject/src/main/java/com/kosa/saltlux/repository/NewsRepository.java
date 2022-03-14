@@ -25,14 +25,14 @@ public class NewsRepository {
 			@Override
 			public NewsVO mapRow(ResultSet rs, int rowNum) throws SQLException {
 				NewsVO news = new NewsVO();
-				news.setNewsNo(rs.getInt("news_no"));
+//				news.setNewsNo(rs.getInt("news_no"));
 				news.setTitle(rs.getString("title"));
 				news.setContents(rs.getString("contents"));
 				news.setImageURL(rs.getString("image_url"));
 				news.setThumbnailURL(rs.getString("thumbnail_url"));
 				news.setPress(rs.getString("press"));
 				news.setCategory(rs.getString("category"));
-				news.setNewsDate(rs.getDate("news_date"));
+//				news.setNewsDate(rs.getDate("news_date"));
 				news.setNouns(rs.getString("nouns"));
 				return news;
 			}

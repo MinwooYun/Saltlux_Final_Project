@@ -1,22 +1,23 @@
 package com.kosa.saltlux.vo;
 
-import java.sql.Date;
+import java.util.Date;
 
 public class NewsVO {
-	private int newsNo;
+	private String newsNo;
 	private String title;
 	private String contents;
 	private String imageURL;
 	private String thumbnailURL;
 	private String press;
 	private String category;
-	private Date newsDate;
+	private String newsDate;
 	private String nouns;
+	private String fragments;
 	
-	public int getNewsNo() {
+	public String getNewsNo() {
 		return newsNo;
 	}
-	public void setNewsNo(int newsNo) {
+	public void setNewsNo(String newsNo) {
 		this.newsNo = newsNo;
 	}
 	public String getTitle() {
@@ -55,10 +56,10 @@ public class NewsVO {
 	public void setCategory(String category) {
 		this.category = category;
 	}
-	public Date getNewsDate() {
+	public String getNewsDate() {
 		return newsDate;
 	}
-	public void setNewsDate(Date newsDate) {
+	public void setNewsDate(String newsDate) {
 		this.newsDate = newsDate;
 	}
 	public String getNouns() {
@@ -68,6 +69,12 @@ public class NewsVO {
 		this.nouns = nouns;
 	}
 	
+	public String getFragments() {
+		return fragments;
+	}
+	public void setFragments(String fragments) {
+		this.fragments = fragments;
+	}
 	@Override
 	public String toString() {
 		return "newsVO [newsNo=" + newsNo + ", title=" + title + ", contents=" + contents + ", imageURL=" + imageURL

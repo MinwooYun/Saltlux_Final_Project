@@ -181,14 +181,14 @@ public class UserController {
 		return jsonList.toString();
 	}
 	
-	@GetMapping(value = version + "/autocomplete")
-	public String Autocomplete(Model model, @RequestParam final String term) throws IOException {
-
-		model.addAttribute("words", Arrays.asList("Saltlux", "솔트룩스", term));
-		
-		return "jsonView";
-		
-	}
+//	@GetMapping(value = version + "/autocomplete")
+//	public String Autocomplete(Model model, @RequestParam final String term) throws IOException {
+//
+//		model.addAttribute("words", Arrays.asList("Saltlux", "솔트룩스", term));
+//		
+//		return "jsonView";
+//		
+//	}
 	
 	@ResponseBody
 	@RequestMapping(value = version + "/risings")

@@ -4,7 +4,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
@@ -151,6 +153,7 @@ public class ElasticsearchService {
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 
 		SearchRequest searchRequest = new SearchRequest("news");
+
 		List<Object> result = new ArrayList<>();
 		
 		// 검색 조건 필터 : nouns 필드 외에 검색 안 되도록
@@ -165,8 +168,8 @@ public class ElasticsearchService {
 		HighlightBuilder highlightBuilder = new HighlightBuilder();
 		
 		highlightBuilder.field("contents");
-		highlightBuilder.preTags("<AA>");
-		highlightBuilder.postTags("<BB>");
+		highlightBuilder.preTags("<b>");
+		highlightBuilder.postTags("</b>");
 		highlightBuilder.fragmentSize(30);
 		
 		sourceBuilder.fetchSource(fetchSourceContext);
@@ -181,13 +184,26 @@ public class ElasticsearchService {
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
 		
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
-			result.add(hit.getSourceAsMap().values());
-			if(hit.getHighlightFields().get("contents") != null) {
-				result.add(hit.getHighlightFields().get("contents").getFragments()[0]);
+			
+			Map<String, String> map = new HashMap<>();
+			
+			map.put("newsNo", hit.getSourceAsMap().get("news_no").toString());
+			map.put("title", hit.getSourceAsMap().get("title").toString());
+			map.put("contents", hit.getSourceAsMap().get("contents").toString());
+			map.put("imageUrl", hit.getSourceAsMap().get("image_url").toString());
+			map.put("thumbnailUrl", hit.getSourceAsMap().get("thumbnail_url").toString());
+			map.put("press", hit.getSourceAsMap().get("press").toString());
+			map.put("category", hit.getSourceAsMap().get("category").toString());
+			map.put("newsDate", hit.getSourceAsMap().get("news_date").toString());
+			if (hit.getHighlightFields().get("contents") != null) {
+				map.put("fragments", hit.getHighlightFields().get("contents").getFragments()[0].toString());
 			}
 			else {
-				result.add(" ");
+				map.put("fragments", " ");
 			}
+			
+			result.add(map);
+			
 		}
 		
 		return result;
