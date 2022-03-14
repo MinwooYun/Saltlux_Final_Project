@@ -17,6 +17,9 @@ public interface IUserService {
 //	mariaDB 데이터 조회
 	List<NewsVO> getDB(int cnt);
 	
-//	GET 메인페이지 대시보드의 키워드 btf, ntf
-	List<MainDashBoardVO> getMainDashBoard(String category);
+//	GET 메인페이지 대시보드의 Wordcloud
+	List<MainDashBoardVO> getMainDashBoardWordcloud(String category);
+	
+//	GET 결과페이지 Top 10
+	List<RealtimeVO> getRealtimeTop();
 }

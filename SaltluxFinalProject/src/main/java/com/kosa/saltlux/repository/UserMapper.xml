@@ -19,14 +19,14 @@
 	</resultMap>
 	
 	<resultMap type="com.kosa.saltlux.vo.MainDashBoardVO" id="MainDashBoardMap">
-		<result column="YEAR" property="year" />
-		<result column="MONTH" property="month" />
-		<result column="DAY" property="day" />
-		<result column="HOUR" property="hour" />
 		<result column="KEYWORD" property="keyword" />
 		<result column="CATEGORY" property="category" />
 		<result column="BTF" property="btf" />
-		<result column="NTF1" property="ntf1" />
+	</resultMap>
+	
+	<resultMap type="com.kosa.saltlux.vo.RealtimeVO" id="RealtimeMap">
+		<result column="KEYWORD" property="keyword" />
+		<result column="BTF_RATIO" property="btfRatio" />
 	</resultMap>
 	
 	<select id="getPageTotal" resultType="int">
@@ -61,20 +61,31 @@
 		limit #{cnt}, 10;
 	</select>
 	
-	<select id="getMainDashBoard" resultType="com.kosa.saltlux.vo.MainDashBoardVO">
-		select YEAR     AS year
-			  ,MONTH    AS month
-			  ,DAY      AS day
-			  ,HOUR     AS hour
-			  ,KEYWORD  AS keyword
+	<select id="getMainDashBoardWordcloud" resultType="com.kosa.saltlux.vo.MainDashBoardVO">
+		select KEYWORD  AS keyword
 			  ,CATEGORY AS category
 			  ,BTF      AS btf
-			  ,NTF1     AS ntf1 
 		from luxian.maindashboard
-		group by keyword
-		having category = #{category}
+		where category = #{category}
 		order by btf desc
-		limit 200;
+		limit 70;
 	</select>
-
+	
+	<select id="getMainDashBoardWordcloud" resultType="com.kosa.saltlux.vo.MainDashBoardVO">
+		select KEYWORD  AS keyword
+			  ,CATEGORY AS category
+			  ,BTF      AS btf
+		from luxian.maindashboard
+		where category = #{category}
+		order by btf desc
+		limit 70;
+	</select>
+	
+	<select id="getRealtimeTop" resultType="com.kosa.saltlux.vo.RealtimeVO">
+		select KEYWORD   as keword,
+		       BTF_RATIO as btf_ratio 
+		from luxian.realtime
+		order by btf_ratio desc
+		limit 10;
+	</select>
 </mapper>
