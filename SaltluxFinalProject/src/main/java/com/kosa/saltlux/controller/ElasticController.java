@@ -20,20 +20,27 @@ public class ElasticController {
 	@Autowired
 	ElasticsearchService elasticsearchService;
 	
+	public static final String version = "/api/v1";
+	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
-	@RequestMapping(value = "/elastictest", method = RequestMethod.POST)
-	public String elasticTest1(String word, Model model) throws Exception{
-		System.out.println(word);
-		List<Object> elasticList = getAutoCompletionList(word);
-		model.addAttribute("elasticList", elasticList);
-		return "elastic";
+	// news 기사 조회
+	@GetMapping(value = version + "/news")
+	public String searchNews(Model model, @RequestParam String question, @RequestParam int pageNum) throws Exception {
+		
+		model.addAttribute("news", elasticsearchService.searchNews(question, pageNum));
+		
+		return "results";
 	}
 	
-	public List<Object> getAutoCompletionList(String word) throws Exception{
-		List<Object> elasticList = elasticsearchService.autoCompletion(word);
-		System.out.println(elasticList);	
-		return elasticList;
+	// news인덱스 count 조회
+	@GetMapping(value = version + "/count")
+	public String getCount(Model model) throws Exception {
+		model.addAttribute("count", elasticsearchService.count());
+		
+		return "results";
 	}
+	
+	
 
 }

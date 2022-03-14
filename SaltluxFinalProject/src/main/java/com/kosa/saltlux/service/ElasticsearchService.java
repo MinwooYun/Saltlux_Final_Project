@@ -26,17 +26,27 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosa.saltlux.config.ElasticSearchConfig;
 
+/**
+ * @author Juhui Park
+ *
+ */
 @Service
 public class ElasticsearchService {
 
@@ -97,13 +107,76 @@ public class ElasticsearchService {
 		searchRequest.source(sourceBuilder);
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore().search(searchRequest, RequestOptions.DEFAULT);
 		
+	
+	// news 기사 조회
+	public List<Object> searchNews(String question, int pageNum) throws Exception {
+		
+		/**
+		 * @author Juhui Park
+		 * 
+		 * news 기사 조회
+		 * 
+		 * @param question
+		 * @param pageNum
+		 * 
+		 * @return List<Object> result
+		 * 
+		 * 
+		 */
+		
+		int startPageNum = ((pageNum-1) * 9);
+		
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+
+		SearchRequest searchRequest = new SearchRequest("news");
 		List<Object> result = new ArrayList<>();
 		
+		// 검색 조건 필터 : nouns 필드 외에 검색 안 되도록
+		String[] includes = null;
+		String[] excludes = new String[]{"nouns"};
+		
+		
+		FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
+		
+		MultiMatchQueryBuilder multiMatchQueryBuilder = new MultiMatchQueryBuilder(question, "title", "contents");
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		HighlightBuilder highlightBuilder = new HighlightBuilder();
+		
+		highlightBuilder.field("contents");
+		highlightBuilder.preTags("<AA>");
+		highlightBuilder.postTags("<BB>");
+		highlightBuilder.fragmentSize(30);
+		
+		sourceBuilder.fetchSource(fetchSourceContext);
+		sourceBuilder.highlighter(highlightBuilder);
+		
+		sourceBuilder.query(multiMatchQueryBuilder);
+		sourceBuilder.from(startPageNum);
+		sourceBuilder.size(9);
+
+		
+		searchRequest.source(sourceBuilder);
+		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
+		
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
-			result.addAll(hit.getSourceAsMap().values());
+			result.add(hit.getSourceAsMap());
+			result.add(hit.getHighlightFields());
 		}
 		
 		return result;
+
+	}
+	
+	
+	// news인덱스 count 조회
+	public long count() throws Exception {
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+		
+		CountRequest countRequest = new CountRequest("news"); 
+		CountResponse countResponse = restHighLevelClientSSLIgnore.count(countRequest, RequestOptions.DEFAULT);
+		System.out.println(countResponse.getCount());
+		
+		return countResponse.getCount();
 	}
 	
 }
