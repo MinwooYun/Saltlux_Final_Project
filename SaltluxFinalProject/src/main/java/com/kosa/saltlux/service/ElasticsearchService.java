@@ -182,7 +182,12 @@ public class ElasticsearchService {
 		
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
 			result.add(hit.getSourceAsMap().values());
-			result.add(hit.getHighlightFields().get("contents").getFragments()[0]);
+			if(hit.getHighlightFields().get("contents") != null) {
+				result.add(hit.getHighlightFields().get("contents").getFragments()[0]);
+			}
+			else {
+				result.add(" ");
+			}
 		}
 		
 		return result;
