@@ -33,6 +33,11 @@
 			<version>${org.springframework-version}</version>
 		</dependency>
 		
+		<dependency>
+	      <groupId>com.googlecode.json-simple</groupId>
+	      <artifactId>json-simple</artifactId>
+	      <version>1.1.1</version>
+	   </dependency>
 		
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -65,6 +70,14 @@
 			<artifactId>mybatis-spring</artifactId>
 			<version>2.0.6</version>
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.ibatis/ibatis-sqlmap -->
+		<dependency>
+		    <groupId>org.apache.ibatis</groupId>
+		    <artifactId>ibatis-sqlmap</artifactId>
+		    <version>2.3.4.726</version>
+		</dependency>
+		
 		
 				
 		<!-- AspectJ -->

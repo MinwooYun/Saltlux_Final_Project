@@ -40,6 +40,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -170,7 +171,7 @@ public class ElasticsearchService {
 		highlightBuilder.field("contents");
 		highlightBuilder.preTags("<strong>");
 		highlightBuilder.postTags("</strong>");
-		highlightBuilder.fragmentSize(80);
+		highlightBuilder.fragmentSize(30);
 		
 		sourceBuilder.fetchSource(fetchSourceContext);
 		sourceBuilder.highlighter(highlightBuilder);
@@ -231,6 +232,67 @@ public class ElasticsearchService {
 		System.out.println(countResponse.getCount());
 		
 		return countResponse.getCount();
+	}
+	
+	// 파이썬 : 연관검색어 
+	public List<Object> searchNewsForSuggetionTerm(String question) throws Exception {
+		
+		/**
+		 * @author Juhui Park
+		 * 
+		 * 파이썬에서 연관검색어를 구하기 위한 서비스
+		 * 
+		 * 
+		 * @param question : 사용자 질문
+		 * @param size : 검색 문서 수
+		 * 
+		 * @return List<Object> result
+		 * 
+		 * 
+		 */
+		
+		List<Object> result = new ArrayList<>();
+		
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+
+		SearchRequest searchRequest = new SearchRequest("news");
+		
+		// 검색 조건 필터 : nouns 필드 외에 검색 안 되도록
+		String[] includes = new String[]{"nouns"};
+		String[] excludes = null;
+		
+		
+		FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
+		
+		MultiMatchQueryBuilder multiMatchQueryBuilder = new MultiMatchQueryBuilder(question, "title", "contents");
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		
+		sourceBuilder.fetchSource(fetchSourceContext);
+		
+		sourceBuilder.query(multiMatchQueryBuilder);
+//		sourceBuilder.size(size);
+
+		
+		searchRequest.source(sourceBuilder);
+		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
+
+		
+		for (SearchHit hit : searchResponse.getHits().getHits()) {
+			
+			JSONObject jsonObject=new JSONObject();
+			
+			jsonObject.put("nouns", hit.getSourceAsMap().values().toString().replace("[", "").replace("]", ""));
+			jsonObject.put("scores", hit.getScore());
+			
+//			Map<String, String>
+//			result.add(hit.getSourceAsMap());
+//			result.add(hit.getScore());
+//			System.out.println(hit.getSourceAsMap());
+//			System.out.println(hit.getScore());
+			result.add(jsonObject);
+		}
+		
+		return result;
 	}
 	
 }

@@ -15,7 +15,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
+import javax.sql.DataSource;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -56,6 +58,8 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.indices.AnalyzeRequest;
 import org.elasticsearch.client.indices.AnalyzeRequest.CustomAnalyzerBuilder;
 import org.elasticsearch.client.indices.AnalyzeResponse;
@@ -79,17 +83,26 @@ import org.elasticsearch.index.analysis.TokenizerFactory;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.ScrollableHitSource.Hit;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -101,10 +114,24 @@ import com.google.gson.JsonParser;
 
 import joptsimple.internal.Strings;
 
+import java.util.Properties;
+import com.ibatis.common.resources.Resources;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+//@PropertySource("classpath:elastic.properties")
 public class testElasticSearch {
 
-	private String hostname = "https://saltlux-final.es.us-central1.gcp.cloud.es.io"; // localhost
+//	@Value("${hostname}")
+//	private String hostname;
+	
+	private String hostname = "saltlux-final.es.us-central1.gcp.cloud.es.io";
 
 	private Integer port = 9243;
 
@@ -119,6 +146,7 @@ public class testElasticSearch {
 	private String username = "root";
 	
 	private String pwd = "sw_saltlux";
+	
 
 	/**
 	 * SSL 무시하고 통신하는 Elastic Search Client 객체 {@link RestHighLevelClient}를 생성해서 반환한다.
@@ -166,17 +194,17 @@ public class testElasticSearch {
 	 * @throws Exception
 	 */
 //	@Test
-//	public void get() throws Exception {
-//
-//		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
-//
-//		GetRequest getRequest = new GetRequest("news", "3");
-//		
-//		GetResponse getResponse = restHighLevelClientSSLIgnore.get(getRequest, RequestOptions.DEFAULT);
-//		
-//		System.out.println(getResponse);
-//		
-//	}
+	public void get() throws Exception {
+
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+
+		GetRequest getRequest = new GetRequest("news", "3");
+		
+		GetResponse getResponse = restHighLevelClientSSLIgnore.get(getRequest, RequestOptions.DEFAULT);
+		
+		System.out.println(getResponse.getSourceAsMap().get("contents"));
+		
+	}
 //	
 //	/**
 //	 * 
@@ -234,106 +262,97 @@ public class testElasticSearch {
 //	 */
 //	@SuppressWarnings("deprecation")
 //	@Test
-//	public void news_bulk() throws Exception {
-//		
-//		BulkProcessor.Listener listener = new BulkProcessor.Listener() {
-//			
-//			int count = 0;
-//
-//			@Override
-//			public void beforeBulk(long executionId, BulkRequest request) {
-//				count = count + request.numberOfActions(); 
-//				System.out.println("Uploaded " + count + " requests");
-//
-//			}
-//
-//			@Override
-//			public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-//				if (response.hasFailures()) { 
-//					for (BulkItemResponse bulkItemResponse : response) { 
-//						if (bulkItemResponse.isFailed()) { 
-//							BulkItemResponse.Failure failure = bulkItemResponse.getFailure(); 
-//							System.out.println("Error " + failure.toString()); 
-//						} 
-//					} 
-//				}
-//				
-//			}
-//
-//			@Override
-//			public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-//				System.out.println("Errors " + failure.toString());
-//			}
-//		};
-//		
-//		BulkProcessor bulkProcessor = BulkProcessor.builder((request, bulkListener) -> {
-//			try {
-//				restHighLevelClientSSLIgnore().bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
-//			} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-//				
-//				e.printStackTrace();
-//			}
-//        }, listener)
-//			.setBulkActions(10) // 요청 개수가 10개이면 flush
-//			.setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB)) // 요청한 파일의 총 용량이 7MB면 flush
+	public void news_bulk() throws Exception {
+		
+		BulkProcessor.Listener listener = new BulkProcessor.Listener() {
+			
+			int count = 0;
+
+			@Override
+			public void beforeBulk(long executionId, BulkRequest request) {
+				count = count + request.numberOfActions(); 
+				System.out.println("Uploaded " + count + " requests");
+
+			}
+
+			@Override
+			public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+				if (response.hasFailures()) { 
+					for (BulkItemResponse bulkItemResponse : response) { 
+						if (bulkItemResponse.isFailed()) { 
+							BulkItemResponse.Failure failure = bulkItemResponse.getFailure(); 
+							System.out.println("Error " + failure.toString()); 
+						} 
+					} 
+				}
+				
+			}
+
+			@Override
+			public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+				System.out.println("Errors " + failure.toString());
+			}
+		};
+		
+		BulkProcessor bulkProcessor = BulkProcessor.builder((request, bulkListener) -> {
+			try {
+				restHighLevelClientSSLIgnore().bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
+			} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+				
+				e.printStackTrace();
+			}
+        }, listener)
+			.setBulkActions(1) // 요청 개수가 10개이면 flush
+//			.setBulkSize(new ByteSizeValue(7, ByteSizeUnit.MB)) // 요청한 파일의 총 용량이 7MB면 flush
 //			.setFlushInterval(TimeValue.timeValueSeconds(10)) // 요청 후 10초가 되면 flush
-//			.setBackoffPolicy(
-//					BackoffPolicy.constantBackoff(TimeValue.timeValueMillis(5000), 1)
-//					) // retry 정책 요청 후 5초 이상 응답이 없을 경우 1회 재시도
-//			.build();
-//		
-//		
-//		Connection conn = null;
-//		PreparedStatement pstmt = null;
-//		ResultSet rs = null;
-//		
-//		try {
-//			Class.forName(driver);
-//			conn = DriverManager.getConnection(url, username, pwd);
-//			System.out.println("연결 성공");
-//			
-////			String sql = "select * from news where news_no between 12 and 31"; // 임시로 몇 개만 테스트하기 위해 설정한 것
-//			String sql = "select contents from news where news_no between 12 and 31"; // 임시로 몇 개만 테스트하기 위해 설정한 것
-//			
-//			pstmt = conn.prepareStatement(sql);
-//			rs = pstmt.executeQuery();
-//			
-//			int idx = 1;	
-//			
-////			while(rs.next()) {
-////				bulkProcessor.add(new IndexRequest("news").id(Integer.toString(idx)).source(
-////						"news_no", rs.getInt("news_no"),
-////						"title", rs.getString("title"),
-////						"contents", rs.getString("contents"),
-////						"image_url", rs.getString("image_url"),
-////						"thumbnail_url", rs.getString("thumbnail_url"),
-////						"press", rs.getString("press"),
-////						"category", rs.getString("category"),
-////						"news_date", rs.getDate("news_date").toString(),
-////						"nouns", rs.getString("nouns")
-////				));
-////				
-////				idx++;
-////			}
-//			
-//			while(rs.next()) {
-//				bulkProcessor.add(new IndexRequest("news_keyword").id(Integer.toString(idx)).source(
-//						"keyword", rs.getString("contents")
-//				));
-//				
-//				idx++;
-//			}
-//		}
-//		catch(Exception e) {
-//			e.printStackTrace();
-//		}
-//		finally {
-//			conn.close();
-//			pstmt.close();
-//			rs.close();
-//			System.out.println("Driver 연결 종료");
-//		}
-//	}
+			.setBackoffPolicy(
+					BackoffPolicy.constantBackoff(TimeValue.timeValueMillis(5000), 1)
+					) // retry 정책 요청 후 5초 이상 응답이 없을 경우 1회 재시도
+			.build();
+		
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			Class.forName(driver);
+			conn = DriverManager.getConnection(url, username, pwd);
+			System.out.println("연결 성공");
+			
+//			String sql = "select * from news"; 
+			String sql = "select * from news where news_no = 1465035"; // 임시로 몇 개만 테스트하기 위해 설정한 것
+			
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			int idx = 1465035;
+			
+			while(rs.next()) {
+				bulkProcessor.add(new IndexRequest("news").id(Integer.toString(idx)).source(
+						"news_no", rs.getInt("news_no"),
+						"title", rs.getString("title"),
+						"contents", rs.getString("contents"),
+						"image_url", rs.getString("image_url"),
+						"thumbnail_url", rs.getString("thumbnail_url"),
+						"press", rs.getString("press"),
+						"category", rs.getString("category"),
+						"news_date", rs.getDate("news_date").toString(),
+						"nouns", rs.getString("nouns")
+				));
+				idx++;
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			conn.close();
+			pstmt.close();
+			rs.close();
+			System.out.println("Driver 연결 종료");
+		}
+	}
 	
 
 //	@SuppressWarnings("unchecked")
@@ -366,7 +385,8 @@ public class testElasticSearch {
 //	}
 	
 	
-	
+	static int idx = 204800;
+	final static int from = 550;
 	
 	/**
 	 * 
@@ -375,11 +395,12 @@ public class testElasticSearch {
 	 *
 	 * @throws Exception
 	 */
-	public List<String> getContents() throws Exception {
+	public List<Object> getContents() throws Exception {
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 
 		SearchRequest searchRequest = new SearchRequest("news");
-		List<String> result = new ArrayList<>();
+		List<Object> result = new ArrayList<>();
+		int count = 0;
 		
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		
@@ -390,14 +411,19 @@ public class testElasticSearch {
 		
 		FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
 		sourceBuilder.fetchSource(fetchSourceContext);
+		sourceBuilder.from(from);
+		sourceBuilder.size(100); // 1465034
 		searchRequest.source(sourceBuilder);
+		
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
 		
 //		ObjectMapper mapper = new ObjectMapper();
 		
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
-			result.add(hit.getSourceAsString());
+			result.addAll(hit.getSourceAsMap().values());
+			count++;
 		}
+		System.out.println("nouns: " + count);
 		
 		return result;
 
@@ -414,11 +440,12 @@ public class testElasticSearch {
 
 	public HashSet<String> /*void*/ getTokens() throws Exception {
 		
-		List<String> textList = getContents();
+		List<Object> textList = getContents();
 		HashSet<String> tokenSet = new HashSet<>();
 //		List<String> tokenList = new ArrayList<>();
+		int count = 0;
 		
-		for(String text : textList) {
+		for(Object text : textList) {
 			
 //			AnalyzeRequestBuilder requestBuilder = new AnalyzeRequestBuilder((ElasticsearchClient) restHighLevelClientSSLIgnore(), null);
 //			TokenFilter shingleFilter = new ShingleFilter(null, 3);
@@ -429,19 +456,22 @@ public class testElasticSearch {
 //			shingleFilter.setMinShingleSize(2);
 	
 //			requestBuilder.addTokenFilter(shingleFilter);
-			AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer("news_keyword", "nori_analyzer", text);
+			AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer("auto_completion", "shingle_analyzer", text.toString());
 //			request.toXContent(XContentFactory.jsonBuilder().field("max_shingle_size", 3).field("min_shingle_size", 2), null);
 			AnalyzeResponse response = restHighLevelClientSSLIgnore().indices().analyze(request, RequestOptions.DEFAULT);
 			List<AnalyzeResponse.AnalyzeToken> tokens = response.getTokens();
 			
 			for(AnalyzeResponse.AnalyzeToken token : tokens) {
 
-				if(token.getType().equals("shingle") || token.getType().equals("word")) {
+				if(token.getType().equals("shingle") || token.getType().equals("<HANGUL>")) {
 					tokenSet.add(token.getTerm());
+					count++;
 //					System.out.println(token.getTerm());
 				}
 			}
 		}
+		
+		System.out.println("tokens: " + count);
 				
 		return tokenSet;
 //		return tokenList;
@@ -507,47 +537,45 @@ public class testElasticSearch {
 			.build();
 		
 		
-		int idx = 1;
+//		int idx = 4001;
 		
 		for (String token : tokenSet) {
-			bulkProcessor.add(new IndexRequest("news_keyword").id(Integer.toString(idx)).source(
-				"word", token
+			bulkProcessor.add(new IndexRequest("auto_completion").id(Integer.toString(idx)).source(
+				"search_terms", token
 			));
 
 			idx++;
 		}
-	
+		
+		System.out.println("index 저장 완료");
+		
 	}
 	
-	@Test
+//	@Test
 	public void autoCompletion() throws Exception {
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 
-		SearchRequest searchRequest = new SearchRequest("news_keyword");
+		SearchRequest searchRequest = new SearchRequest("auto_completion");
 		
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-		MatchPhrasePrefixQueryBuilder matchPhrasePrefixQueryBuilder = new MatchPhrasePrefixQueryBuilder("word", "서");
-		FuzzyQueryBuilder fuzzyQueryBuilder = new FuzzyQueryBuilder("word", "서");
 		
+		MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("search_terms.edgengram", "셀");
 		
-		QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.minimumShouldMatch(1)
-				.should(fuzzyQueryBuilder)
-				.should(matchPhrasePrefixQueryBuilder);
+		sourceBuilder.query(matchQueryBuilder);
+//		sourceBuilder.aggregation(AggregationBuilders.topHits("duplication").size(1).fetchField("search_terms"));
+		sourceBuilder.size(10);
 		
-		sourceBuilder.query(queryBuilder);
 		searchRequest.source(sourceBuilder);
-//		searchRequest.source().sort("_score");
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
-		
-//		ObjectMapper mapper = new ObjectMapper();
-//		System.out.println(searchResponse);
-		
+
 		List<Object> result = new ArrayList<>();
 		
+//		System.out.println(searchResponse.getAggregations().getAsMap());
+	
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
-			result.addAll(hit.getSourceAsMap().values());
+			if (!result.containsAll(hit.getSourceAsMap().values())) {
+				result.addAll(hit.getSourceAsMap().values());
+			}
 		}
 		
 		System.out.println(result);
@@ -555,46 +583,204 @@ public class testElasticSearch {
 	
 
 //	@Test
-	public void searchNews() throws Exception {
-		List<String> li = new ArrayList<>();
-		li.add("서울");
-		li.add("현재");
-		li.add("날씨");
+	public /*List<Object>*/ void searchNews() throws Exception {
+//		List<String> li = new ArrayList<>();
+//		li.add("서울");
+//		li.add("현재");
+//		li.add("날씨");
 		
+		//받아온 pageNum
+		int pageNum = 1;
+		
+		int startPageNum = ((pageNum-1) * 9);
+		
+//		String terms = li.stream().map(w -> String.valueOf(w) + ' ').collect(Collectors.joining());
+		String terms = "코로나";
 		
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 
 		SearchRequest searchRequest = new SearchRequest("news");
 //		List<String> result = new ArrayList<>();
 		
-		QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.minimumShouldMatch(1)
-				.should(new MatchPhrasePrefixQueryBuilder("contents", li))
-				.should(new MatchPhrasePrefixQueryBuilder("title", li));
+		// 검색 조건 필터 : nouns 필드 외에 검색 안 되도록
+		String[] includes = null;
+		String[] excludes = new String[]{"nouns"};
 		
+		
+		FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
+		
+		MultiMatchQueryBuilder multiMatchQueryBuilder = new MultiMatchQueryBuilder(terms, "title", "contents");
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		HighlightBuilder highlightBuilder = new HighlightBuilder();
 		
+		highlightBuilder.field("contents");
+		highlightBuilder.preTags("<AA>");
+		highlightBuilder.postTags("<BB>");
+		highlightBuilder.fragmentSize(30);
+		
+		sourceBuilder.fetchSource(fetchSourceContext);
+		sourceBuilder.highlighter(highlightBuilder);
+		
+		sourceBuilder.query(multiMatchQueryBuilder);
+		sourceBuilder.from(startPageNum);
+		sourceBuilder.size(9);
+
+		
+		searchRequest.source(sourceBuilder);
+		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
+
+		List<Object> result = new ArrayList<>();
+		
+		
+		for (SearchHit hit : searchResponse.getHits().getHits()) {
+			
+//			System.out.println(hit.getSourceAsMap().get("news_date").toString());
+			Map<String, String> map = new HashMap<>();
+			
+			map.put("newsNo", hit.getSourceAsMap().get("news_no").toString());
+			map.put("title", hit.getSourceAsMap().get("title").toString());
+			map.put("contents", hit.getSourceAsMap().get("contents").toString());
+			map.put("imageUrl", hit.getSourceAsMap().get("image_url").toString());
+			map.put("thumbnailUrl", hit.getSourceAsMap().get("thumbnail_url").toString());
+			map.put("press", hit.getSourceAsMap().get("press").toString());
+			map.put("category", hit.getSourceAsMap().get("category").toString());
+			map.put("newsDate", hit.getSourceAsMap().get("news_date").toString());
+			if (hit.getHighlightFields().get("contents") != null) {
+				map.put("fragments", hit.getHighlightFields().get("contents").getFragments()[0].toString());
+				System.out.println("%%%%%" + hit.getHighlightFields().get("contents").getFragments()[0].toString());
+			}
+			else {
+				map.put("fragments", " ");
+			}
+			
+//			result.add(hit.getSourceAsString());
+//			System.out.println(hit.getSourceAsMap());
+//			System.out.println("================");
+//			if(hit.getHighlightFields().get("contents") != null)
+//				System.out.println(hit.getHighlightFields().get("contents").getFragments()[0]);
+//			System.out.println("================");
+//			System.out.println(hit.getHighlightFields().values());
+			
+//			for (HighlightField highlight : hit.getHighlightFields().values()) {
+//				System.out.println("================");
+//				System.out.println(highlight.getFragments());
+//				System.out.println("================");
+//			}
+			
+//			list.add(hit.getSourceAsMap());
+//			if(hit.getHighlightFields().get("contents") != null) {
+//				list.add(hit.getHighlightFields().get("contents").getFragments()[0]);
+//			}
+//			else {
+//				list.add(" ");
+//			}
+//			list.add(hit.getSourceAsMap());
+			result.add(map);
+		}
+//		System.out.println("********************************");
+//		System.out.println(list);
+//		System.out.println("********************************");
+//		System.out.println(result);
+//		return list;
+		System.out.println(result);
+
+	}
+
+//	@Test
+	public void count() throws Exception {
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+		
+		CountRequest countRequest = new CountRequest("news"); 
+		CountResponse countResponse = restHighLevelClientSSLIgnore.count(countRequest, RequestOptions.DEFAULT);
+		System.out.println(countResponse.getCount());
+	}
+	
+	
+	@Test
+	public void searchNewsForSuggetionTerm() throws Exception {
+
+		String terms = "서울 현재 날씨는?";
+		int size = 10;
+
+		
+		List<Object> result = new ArrayList<>();
+		
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+
+		SearchRequest searchRequest = new SearchRequest("news");
 		
 		// 검색 조건 필터 : nouns 필드 외에 검색 안 되도록
-		String[] includes = new String[]{"title", "contents", "image_url", "thumbnail_url"};
+		String[] includes = new String[]{"nouns"};
 		String[] excludes = null;
 		
 		
 		FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
+		
+		MultiMatchQueryBuilder multiMatchQueryBuilder = new MultiMatchQueryBuilder(terms, "title", "contents");
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		
 		sourceBuilder.fetchSource(fetchSourceContext);
+		
+		sourceBuilder.query(multiMatchQueryBuilder);
+		sourceBuilder.size(size);
 
-		sourceBuilder.query(queryBuilder);
+		
 		searchRequest.source(sourceBuilder);
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
+
 		
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
-//			result.add(hit.getSourceAsString());
-			System.out.println(hit.getSourceAsMap());
+			
+			JSONObject jsonObject=new JSONObject();
+			
+			jsonObject.put("nouns", hit.getSourceAsMap().values().toString().replace("[", "").replace("]", ""));
+			jsonObject.put("scores", hit.getScore());
+			
+//			Map<String, String>
+//			result.add(hit.getSourceAsMap());
+//			result.add(hit.getScore());
+//			System.out.println(hit.getSourceAsMap());
+//			System.out.println(hit.getScore());
+			result.add(jsonObject);
 		}
+		System.out.println(result);
 		
-//		return result;
-
+//		sendJSON(terms, result);
 	}
 	
+	
+	public String sendJSON(String terms, List<Object> result) throws Exception {
+		String inputLine = null;
+		StringBuffer stringBuffer = new StringBuffer();
+		
+		
+		URL url = new URL("http://localhost:5000/news?question=" + terms);
+		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+		
+		System.out.println(conn.toString());
+		
+		conn.setDoOutput(true);
+		conn.setDoInput(true);
+		conn.setRequestMethod("POST"); // GET
+		conn.setRequestProperty("Content-Type", "application/json");
+		conn.setRequestProperty("Accept-Charset", "UTF-8");
+			
+		
+		// 데이터 전송
+		BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+		bWriter.write(result.toString());
+		
+		// 전송된 결과를 읽어옴
+		BufferedReader bReader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+		while((inputLine=bReader.readLine()) != null) {
+			stringBuffer.append(inputLine);
+		}
+		
+        bWriter.close();
+        bReader.close();
+        conn.disconnect();
+		
+		return stringBuffer.toString();
+	}
 	
 }
