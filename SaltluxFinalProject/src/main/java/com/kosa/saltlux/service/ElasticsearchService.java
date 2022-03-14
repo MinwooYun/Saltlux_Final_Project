@@ -50,7 +50,7 @@ import com.kosa.saltlux.config.ElasticSearchConfig;
 @Service
 public class ElasticsearchService {
 
-	private String hostname = "https://saltlux-final.es.us-central1.gcp.cloud.es.io"; // localhost
+	private String hostname = "saltlux-final.es.us-central1.gcp.cloud.es.io"; // localhost
 
 	private Integer port = 9243;
 
@@ -97,7 +97,7 @@ public class ElasticsearchService {
 		 * 
 		 * 자동완성 기능
 		 * 
-		 * @param term
+		 * @param term : 사용자 질의
 		 * @return : List<Object> result, Object 개수 : 10
 		 * 
 		 * 
@@ -138,8 +138,8 @@ public class ElasticsearchService {
 		 * 
 		 * news 기사 조회
 		 * 
-		 * @param question
-		 * @param pageNum
+		 * @param question : 사용자 질문
+		 * @param pageNum : 페이지 번호
 		 * 
 		 * @return List<Object> result
 		 * 
@@ -181,8 +181,8 @@ public class ElasticsearchService {
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
 		
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
-			result.add(hit.getSourceAsMap());
-			result.add(hit.getHighlightFields());
+			result.add(hit.getSourceAsMap().values());
+			result.add(hit.getHighlightFields().get("contents").getFragments()[0]);
 		}
 		
 		return result;
@@ -192,6 +192,17 @@ public class ElasticsearchService {
 	
 	// news인덱스 count 조회
 	public long count() throws Exception {
+		
+		/**
+		 * @author Juhui Park
+		 * 
+		 * 전체 news 기사의 count 값 조회 
+		 * 
+		 * @return count
+		 * 
+		 * 
+		 */
+		
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 		
 		CountRequest countRequest = new CountRequest("news"); 
