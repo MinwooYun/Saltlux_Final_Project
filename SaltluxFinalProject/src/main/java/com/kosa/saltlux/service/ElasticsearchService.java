@@ -93,7 +93,7 @@ public class ElasticsearchService {
 	}
 
 	// 자동완성
-	public List<Object> autoCompletion(String term) throws Exception {
+	public List<Object> getSuggestionTerms(String term) throws Exception {
 		
 		/**
 		 * @author Juhui Park
@@ -257,7 +257,7 @@ public class ElasticsearchService {
 
 		SearchRequest searchRequest = new SearchRequest("news");
 		
-		// 검색 조건 필터 : nouns 필드 외에 검색 안 되도록
+		// 검색 조건 필터 : nouns 필드만 포함
 		String[] includes = new String[]{"nouns"};
 		String[] excludes = null;
 		
@@ -268,11 +268,8 @@ public class ElasticsearchService {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		
 		sourceBuilder.fetchSource(fetchSourceContext);
-		
 		sourceBuilder.query(multiMatchQueryBuilder);
-//		sourceBuilder.size(size);
 
-		
 		searchRequest.source(sourceBuilder);
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
 
