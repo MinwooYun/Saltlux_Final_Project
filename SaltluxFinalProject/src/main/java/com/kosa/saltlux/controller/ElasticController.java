@@ -12,10 +12,12 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -43,125 +45,110 @@ public class ElasticController {
 	@Autowired
 	ElasticsearchService elasticsearchService;
 	
-//	public static final String version = "/api/v1";
-	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
-	// 자동완성
-	@GetMapping(value = "/api/v1/autocomplete")
-	   public String autoComplete(Model model, @RequestParam final String term) throws Exception {
-
-	      model.addAttribute("words", elasticsearchService.autoCompletion(term));
-	      
-	      return "jsonView";
-	      
-	   }
+	// 추천검색어
+	@GetMapping(value = "/api/v1/suggestion-terms")
+	public String autoComplete(Model model, @RequestParam final String term) throws Exception {
 	
-	// news 기사 조회
+		model.addAttribute("words", elasticsearchService.getSuggestionTerms(term));
+      
+		return "jsonView";
+      
+   }
+	
+
 	@GetMapping(value = "/news")
 	public String searchNews(Model model, String question, int pageNum) throws Exception {
-						
+		
+		// 1. 사용자가 검색한 문자열에 대하여 엘라스틱 인덱스에서 조회한 검색 결과 콘텐츠
 		model.addAttribute("newsList", elasticsearchService.searchNews(question, pageNum));
-		
+      
+		// 2. 사용자가 검색한 문자열에 대하여 플라스크에서 유사 키워드 도출
+		// 해당 타입은 map <사용자 검색 문자열, 엘라스틱에서 조회한 검색 결과 콘텐츠 {nouns, score}>
 		Map<String, Float> suggestionMap = new HashMap<>(resultBoard(question, elasticsearchService.searchNewsForSuggetionTerm(question)));
-		
+		System.out.println(suggestionMap);
+      
+		// suggestionMap의 key 값 => 유사 키워드
+		Set<String> keySet = suggestionMap.keySet();
+		System.out.println(keySet);
+      
+		// suggestionMap의 value 값 => 유사 키워드의 출현 빈도 점수
+		Collection<Float> values = suggestionMap.values();
+		System.out.println(values);
+      
 		model.addAttribute("suggestionMap", suggestionMap);
-		
+            
 		return "results";
 	}
+
 	
 	public HashMap<String, Float> resultBoard(String question, List<Object> result) throws Exception {
 		
-//			String keyword = question.replace(" ", "-");
-//			String reqUrl = "http://127.0.0.1:5000/news?question=" + URLEncoder.encode(keyword, "UTF-8");
-//			URL url = new URL(reqUrl);
-//			HttpURLConnection con = (HttpURLConnection)url.openConnection();
-//			con.setRequestMethod("GET");
-//			
-//			//서버에서 응답한걸 받기위한 stream
-//			InputStream in = con.getInputStream();
-//			//바이트단위로 쪼개서 보내짐, 한글로 받기 위해
-//			InputStreamReader reader = new InputStreamReader(in, "UTF-8");
-//			BufferedReader response = new BufferedReader(reader);
-//			
-//			String str = null;
-//			StringBuffer buff = new StringBuffer();
-//			
-//			while((str = response.readLine()) != null) {
-//				buff.append(str + "\n");
-//			}
-//			String data = buff.toString().trim();
-//			
-//			JSONParser parser = new JSONParser();
-//			Object obj = parser.parse(data);
-//			JSONObject jsonObj = (JSONObject) obj;
-//			System.out.println(jsonObj);
-//			
-//			BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
-//	        bWriter.write(jsonObj.toString());
-//
-//		return question;	
+		/**
+		 * @param question
+		 * @param result
+		 * @return associatedWords
+		 * 
+		 * 플라스크와 데이터 주고받는 method
+		 * step 1: flask에 사용자 검색 문자열과 검색 결과 콘텐츠 전달
+		 * step 2: flask로부터 연관어 키워드 jsonObject 받음
+		 * 
+		 */
 		
-		String inputLine = null;
-		StringBuffer stringBuffer = new StringBuffer();
+		JSONParser parser = new JSONParser();
+	   
+		// 1. 사용자 검색 문자열 전달 => url에 태워 전송
+		String keyword = question.replace(" ", "-");
+		String reqUrl = "http://127.0.0.1:5000/news?question=" + URLEncoder.encode(keyword, "UTF-8");
+		URL url = new URL(reqUrl);
+		HttpURLConnection con = (HttpURLConnection)url.openConnection();
+		 
+		// 2. 검색 결과 콘텐츠 정보 전달 => json으로 전송
+		Object resultObj = parser.parse(result.toString());
+		JSONArray jsonArray = (JSONArray) resultObj;
 		
-		
-		URL url = new URL("http://localhost:5000/news?question=" + URLEncoder.encode(question, "UTF-8"));
-		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-		
-		System.out.println("conn : " + conn.toString());
-		
-		conn.setDoOutput(true);
-		conn.setDoInput(true);
-		conn.setRequestMethod("GET"); // GET
-		conn.setRequestProperty("Content-Type", "application/json");
-		conn.setRequestProperty("Accept-Charset", "UTF-8");
-			
-		
-		// 데이터 전송
-		BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-		
-		System.out.println("conn.getOutputStream() : " + conn.getOutputStream().toString());
-		
-//		JSONParser parser = new JSONParser();
-		JSONArray jsonArray = new JSONArray();
-		
-		for(Object obj : result) {
-//			System.out.println("result's obj: " + obj);
-			jsonArray.add(obj);
-		}
-	
-		
-//		
-//        Object obj = parser.parse(result.toString());
-        
-        
-        
-		System.out.println("jsonArray.toJSONString : " + jsonArray.toJSONString());
+		// Json Array 전달 위한 HttpURLConnection 옵션 설정
+		con.setDoOutput(true);
+		con.setDoInput(true);
+		con.setRequestMethod("POST");
+		con.setRequestProperty("Content-Type", "application/json");
+		con.setRequestProperty("Accept-Charset", "UTF-8");
+		           
+		// flask에 jsonArray 전송
+		BufferedWriter bWriter=new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
 		bWriter.write(jsonArray.toString());
-		
-		System.out.println("&&&&& conn.getInputStream: " + conn.getInputStream());
-		
-		// 전송된 결과를 읽어옴
-		BufferedReader bReader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-		while((inputLine=bReader.readLine()) != null) {
-			stringBuffer.append(inputLine);
-			System.out.println("inputLine: " + inputLine);
+		bWriter.close();
+		      
+		   
+		// flask로부터 유사 키워드, 해당 키워드 점수 json 데이터 읽어옴         
+		BufferedReader bReader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+		  
+		// StringBuffer에 플라스크로부터 받은 데이터 적재
+		String str = null;
+		StringBuffer buff = new StringBuffer();
+		  
+		// 한 글자 씩 StringBuffer에 적재
+		while((str = bReader.readLine()) != null) {
+			buff.append(str + "\n");
 		}
-		
-        bWriter.close();
-        bReader.close();
-        conn.disconnect();
-		
-//		return stringBuffer.toString();
-        return null;
+		  
+		// StringBuffer타입을 String 타입으로 형변환
+		String data = buff.toString().trim();
+		 
+		// data를 JSONObject 타입으로 변환
+		Object associatedWordsObj = parser.parse(data.toString());
+		JSONObject associatedWords = (JSONObject) associatedWordsObj;
+		         
+		return associatedWords;
 	}
+
 	
 	// news인덱스 count 조회
 	@GetMapping(value = "/api/v1/count")
 	public String getCount(Model model) throws Exception {
 		model.addAttribute("count", elasticsearchService.count());
-		
+	
 		return "results";
 	}
 	
