@@ -49,9 +49,20 @@ public class ElasticController {
 	
 	// 추천검색어
 	@GetMapping(value = "/api/v1/suggestion-terms")
-	public String autoComplete(Model model, @RequestParam final String term) throws Exception {
-	
+	public String suggestionTerms(Model model, @RequestParam String term) throws Exception {
+		
+		// 여기 만들어야 됨.
+		
 		model.addAttribute("words", elasticsearchService.getSuggestionTerms(term));
+		
+		return null;
+	}
+	
+	// 자동완성
+	@GetMapping(value= "api/v1/autocomplete")
+	public String autoComplete(Model model, @RequestParam String term) throws Exception {
+	
+		model.addAttribute("words", elasticsearchService.autoCompletion(term));
       
 		return "jsonView";
       

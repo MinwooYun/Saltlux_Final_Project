@@ -4,9 +4,11 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 
@@ -30,6 +32,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -40,6 +43,10 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -91,14 +98,53 @@ public class ElasticsearchService {
 		return client;
 
 	}
-
+	
 	// 자동완성
+
+	public List<String> autoCompletion(String term) throws Exception {
+		
+		/**
+		 * @author Juhui Park
+		 * 
+		 * 자동완성 
+		 * 
+		 * @param term
+		 * @return 자동완성 terms List
+		 * 
+		 */
+		
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+
+		SearchRequest searchRequest = new SearchRequest("auto_completion");
+		
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		SuggestBuilder suggestBuilder = new SuggestBuilder();
+		
+		suggestBuilder.addSuggestion("auto_completion_suggest", SuggestBuilders.completionSuggestion("search_terms.suggest").prefix(term));
+		sourceBuilder.suggest(suggestBuilder);
+		sourceBuilder.size(50);
+		
+		searchRequest.source(sourceBuilder);
+		
+		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
+		
+		return searchResponse.getSuggest().filter(CompletionSuggestion.class).stream()
+					.flatMap(s -> s.getOptions().stream())
+					.sorted(Comparator.comparingDouble(Suggest.Suggestion.Entry.Option::getScore))
+					.map(Suggest.Suggestion.Entry.Option::getText)
+					.map(Text::toString)
+					.distinct()
+					.collect(Collectors.toList());
+	}
+	
+
+	// 추천검색어
 	public List<Object> getSuggestionTerms(String term) throws Exception {
 		
 		/**
 		 * @author Juhui Park
 		 * 
-		 * 자동완성 기능
+		 * 추천 검색어
 		 * 
 		 * @param term : 사용자 질의
 		 * @return : List<Object> result, Object 개수 : 10
@@ -116,7 +162,7 @@ public class ElasticsearchService {
 		MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("search_terms.edgengram", term);
 		
 		sourceBuilder.query(matchQueryBuilder);
-		sourceBuilder.size(10);
+		sourceBuilder.size(6);
 		
 		searchRequest.source(sourceBuilder);
 		
