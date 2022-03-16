@@ -47,6 +47,8 @@ class AssociatedWords():
 
             # 탐색된 인접단어들에 대하여 가중치만큼 출현 빈도 부여
             for t in next_noun:
+                if noun == t:
+                    continue
                 key = tuple(sorted([t, noun]))
                 word_dic[key] += cnt
 
@@ -126,7 +128,8 @@ def get_total_co_occurrence(doc_info_list:list, search_text_list:list, word_top_
     related_words_list = []
     # 개별 문서에 대한 연관어 및 해당 동반출현빈도 점수 도출
     for doc_info in doc_info_list:
-        associated_word = AssociatedWords(doc_info['nouns'], doc_info['bm25'])
+        noun_list = doc_info['nouns'].split(' ')
+        associated_word = AssociatedWords(noun_list, doc_info['scores'])
         associated_word.get_co_occurrence_matrix()
         related_words = associated_word.get_co_occurrence_words(search_text_list, top_size=word_top_size)
         related_words_list.append(related_words)

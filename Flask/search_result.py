@@ -42,8 +42,10 @@ def get_refined_keyword():
 
         return response
 
+        return response
 
 if __name__ == '__main__':
     app.debug = True
     app.config['JSON_AS_ASCII'] = False
     app.run()
+

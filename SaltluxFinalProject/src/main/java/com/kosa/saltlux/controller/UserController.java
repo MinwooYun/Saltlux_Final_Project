@@ -93,8 +93,6 @@ public class UserController {
 			newsList5.add(data);
 		}
 		
-		System.out.println(newsList1);
-		
 		HashMap<Integer, Integer> map = new HashMap<>();
 		
 		for(ClusterVO vo : clusterList) {
@@ -122,44 +120,6 @@ public class UserController {
 		return "home";
 	}
 	
-	@RequestMapping("/results")
-	public String testRestRequest(Model model, String search, CriteriaVO cri) {
-		try {
-			System.out.println(search);
-			String keyword = search.replace(" ", "-");
-			String reqUrl = "http://127.0.0.1:5000/results?search=" + URLEncoder.encode(keyword, "UTF-8");
-			URL url = new URL(reqUrl);
-			HttpURLConnection con = (HttpURLConnection)url.openConnection();
-			con.setRequestMethod("GET");
-			
-			//서버에서 응답한걸 받기위한 stream
-			InputStream in = con.getInputStream();
-			//바이트단위로 쪼개서 보내짐, 한글로 받기 위해
-			InputStreamReader reader = new InputStreamReader(in, "UTF-8");
-			BufferedReader response = new BufferedReader(reader);
-			
-			String str = null;
-			StringBuffer buff = new StringBuffer();
-			
-			while((str = response.readLine()) != null) {
-				buff.append(str + "\n");
-			}
-			String data = buff.toString().trim();
-			model.addAttribute("reqResult", data);
-			List<NewsVO> newsList = userService.getNews(cri);
-			
-			int page = 20;
-			
-			model.addAttribute("page", page);
-			model.addAttribute("search", search);
-			model.addAttribute("newsList", newsList);
-			
-			
-		}catch(Exception e) {
-			e.printStackTrace();
-		}	
-		return "results";
-	}
 	
 	/**
 	 * MainDashBoard테이블의 그룹별 데이터를 검색

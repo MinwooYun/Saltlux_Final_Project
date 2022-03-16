@@ -67,8 +67,9 @@
 			  ,CATEGORY AS category
 			  ,BTF      AS btf
 		from luxian.maindashboard
+		WHERE CHAR_LENGTH(keyword) > 1
 		<if test="category != '전체'">
-    		where category = #{category}
+    		and category = #{category}
     	</if>
 		order by btf desc
 		limit 70;

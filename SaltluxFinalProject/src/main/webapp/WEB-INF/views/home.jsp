@@ -13,7 +13,7 @@
 	<link rel="apple-touch-icon" sizes="76x76" href="resources/assets/img/apple-icon.png">
 	<link rel="icon" type="image/png" href="resources/assets/img/favicon.png">
 	
-	<title>Material Kit 2 by Creative Tim</title>
+	<title>Home Page</title>
 	<!--     Fonts and icons     -->
 	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900|Roboto+Slab:400,700" />
 	
@@ -21,6 +21,7 @@
 	<link href="resources/assets/css/nucleo-icons.css" rel="stylesheet" />
 	<link href="resources/assets/css/nucleo-svg.css" rel="stylesheet" />
 	<link rel="stylesheet" href="resources/assets/css/material-kit.css">
+	<link href="resources/assets/css/highcharts.css" rel="stylesheet" />
 
 	<!-- Material Icons -->
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">	
@@ -206,50 +207,6 @@ label .fa {
   text-align:center;
 }
 
-/*WordCloud CSS*/
-.highcharts-figure,
-.highcharts-data-table table {
-    min-width: 80%;
-    max-width: 90%;
-    margin: 1em auto;
-}
-
-.highcharts-data-table table {
-    font-family: Verdana, sans-serif;
-    border-collapse: collapse;
-    border: 1px solid #ebebeb;
-    margin: 10px auto;
-    text-align: center;
-    width: 100%;
-    max-width: 500px;
-}
-
-.highcharts-data-table caption {
-    padding: 1em 0;
-    font-size: 1.2em;
-    color: #555;
-}
-
-.highcharts-data-table th {
-    font-weight: 600;
-    padding: 0.5em;
-}
-
-.highcharts-data-table td,
-.highcharts-data-table th,
-.highcharts-data-table caption {
-    padding: 0.5em;
-}
-
-.highcharts-data-table thead tr,
-.highcharts-data-table tr:nth-child(even) {
-    background: #f8f8f8;
-}
-
-.highcharts-data-table tr:hover {
-    background: #f1f7ff;
-}
-/*end WordCloud*/
 </style>
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
@@ -258,7 +215,7 @@ $(function() {
 	 $( "#searchBox" ).autocomplete({
 	    	source: function( request, response ) {
 				$.ajax( {
-					url: "api/v1/autocomplete",
+					url: "/api/v1/autocomplete",
 					dataType: "jsonp",
 					data: {
 						term: request.term
@@ -314,7 +271,7 @@ $(function() {
 		        name: '빈도수'
 		    }],
 		    title: {
-		        text: categoryName + ' 카테고리 워드 클라우드'
+		        text: ''
 		    }
 		});
 		//end WordCloud
@@ -382,20 +339,6 @@ $(function() {
 	}
 	//end BarChart 
 });
-$(function() {
-	$("input[name='select-chart']").click(function() {
-		var categoryName = $("input[name='cateogryName']:checked").val();
-		var chart = $("input[name='select-chart']:checked").val();
-		var chartRadio = categoryName + "-radio-" + chart;
-		if($('input:radio[name=select-chart]:input[value=' + chartRadio + ']').is(':checked')){
-			alert("a");
-	        //$('#divId').hide();
-	    }else{
-	    	alert("b");
-	        //$('#divId').show();
-	    }
-	});
-});	
 
 $(function setupTabs() {
 	document.querySelectorAll(".tabs__button").forEach(button => {
@@ -467,7 +410,7 @@ $(document).ready(function(){
 
     window.onload = function() {
 
-        setDataIndex();
+    	setDataIndex();
     };
 
     window.onclick = function(event) {
@@ -502,15 +445,6 @@ $(document).ready(function(){
     span.onclick = function() {
         modal.style.display = "none";
     }
-	
-	
-	$(".pagination a").on("click", function(e){
-		e.preventDefault();
-		moveForm.find("input[name='pageNum']").val($(this).attr("href"));
-		moveForm.attr("action", "/results");
-		moveForm.submit();
-		
-	});	
 });
 </script>
 
@@ -539,7 +473,7 @@ $(document).ready(function(){
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
 						    <form action="/news" method="GET" enctype="multipart/form-data">
-					      		<input class="textbox" id="searchBox" name="question" placeholder="Search" type="text">
+					      		<input class="textbox" style="border: 1px solid #32AAA0;" id="searchBox" name="question" placeholder="Search" type="text">
 					      		<input type=hidden name="pageNum" value=1 >
 					      		<input title="Search" value="" type="submit" class="button">
 					      	</form>
@@ -554,118 +488,160 @@ $(document).ready(function(){
 			<div id="issueTabs" class="tabs" style="margin-top:50px;">
 				<div class="tabs__sidebar">
 					<c:forEach var="list" items="${newsList1}" begin="0" end="0">
-						<button class="tabs__button tabs__button--active" data-for-tab="1" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt1}건</p></button>
+						<button class="tabs__button tabs__button--active" data-for-tab="1" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><p>${cnt1}건</p></button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList2}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="2" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt2}건</p></button>
+						<button class="tabs__button" data-for-tab="2" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><p>${cnt2}건</p></button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList3}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="3" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt3}건</p></button>
+						<button class="tabs__button" data-for-tab="3" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><p>${cnt3}건</p></button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList4}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="4" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt4}건</p></button>
+						<button class="tabs__button" data-for-tab="4" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><p>${cnt4}건</p></button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList5}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="5" style="width:18%; height: 150px;font-size: large;">${list.title} <br><p>${cnt5}건</p></button>
+						<button class="tabs__button" data-for-tab="5" style="width:18%; height: 130px;font-size: smallers;">${list.title} <br><p>${cnt5}건</p></button>
 					</c:forEach>
 
 				</div>
-				<div id="tabs__content1" class="tabs__content tabs__content--active" data-tab="1">
+				<div id="tabs__content1" class="tabs__content tabs__content--active" data-tab="1" style="width:90%; margin: auto;">
 					<c:forEach items="${newsList1}" var="list" varStatus="status">
 						<c:choose>
 							<c:when test="${status.index==0}">
-								<div style="width:25%; float:left; text-align:center; display:inline-block;">
-									<img src="${list.imageURL}" style="width: 300px; height: 300px;">
-									<h4>${list.title}</h4>
-									"${fn:substring(list.contents,0,79)}"
+								<div style="width:30%; float:left;">
+									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
+									<h5 style="text-align:center;"><a class="myBtn_multi" href="javascript:;">${list.title}</a></h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3>${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+									
 								</div>
 							</c:when>
 							<c:otherwise>
-								<div style="margin-left:300px; text-align:center; display:inline-block;">	
-								<h4>${list.title}</h4>
-								"${fn:substring(list.contents,0,79)}"
-								<br><br><br><br>
+								<div style="text-align:center; width:60%; float:right;">	
+								<h5 class="font-weight-normal mt-3"><a class="myBtn_multi" href="javascript:;">${list.title}</a></h5>
+									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									<br>
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3>${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px; color:black;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+										
 								</div>	
 							</c:otherwise>
 						</c:choose>
 					</c:forEach>
 				</div>
 				
-				<div id="tabs__content2" class="tabs__content" data-tab="2">
+				<div id="tabs__content2" class="tabs__content" data-tab="2" style="width:90%; margin: auto;">
 					<c:forEach items="${newsList2}" var="list" varStatus="status">
 						<c:choose>
 							<c:when test="${status.index==0}">
-								<div style="width:25%; float:left;">
-									<img src="${list.imageURL}" style="width: 350px; height: 350px; margin-right: 30px;">
-									<h4>${list.title}</h4>
-									"${fn:substring(list.contents,0,79)}"
+								<div style="width:30%; float:left;">
+									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
+									<h5 style="text-align:center;">${list.title}</h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
 								</div>
 							</c:when>
 							<c:otherwise>
-								<div style="margin-left:500px;">	
-								<h4>${list.title}</h4>
-								"${fn:substring(list.contents,0,79)}"
-								<br><br><br><br>
+								<div style="text-align:center; width:60%; float:right;">	
+									<h5 style="text-align:left;">${list.title}</h5>
+									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									<br>
 								</div>	
 							</c:otherwise>
 						</c:choose>
 					</c:forEach>
 				</div>
-				<div id="tabs__content3" class="tabs__content" data-tab="3">
+				<div id="tabs__content3" class="tabs__content" data-tab="3" style="width:90%; margin: auto;">
 					<c:forEach items="${newsList3}" var="list" varStatus="status">
 						<c:choose>
 							<c:when test="${status.index==0}">
-								<div style="width:25%; float:left;">
-									<img src="${list.imageURL}" style="width: 350px; height: 350px; margin-right: 30px;">
-									<h4>${list.title}</h4>
-									"${fn:substring(list.contents,0,79)}"
+								<div style="width:30%; float:left;">
+									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
+									<h5 style="text-align:center;">${list.title}</h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
 								</div>
 							</c:when>
 							<c:otherwise>
-								<div style="margin-left:500px;">	
-								<h4>${list.title}</h4>
-								"${fn:substring(list.contents,0,79)}"
-								<br><br><br><br>
+								<div style="text-align:center; width:60%; float:right;">	
+									<h5 style="text-align:left;">${list.title}</h5>
+									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									<br>
 								</div>	
 							</c:otherwise>
 						</c:choose>
 					</c:forEach>
 				</div>
-				<div id="tabs__content4" class="tabs__content" data-tab="4">
+				<div id="tabs__content4" class="tabs__content" data-tab="4" style="width:90%; margin: auto;">
 					<c:forEach items="${newsList4}" var="list" varStatus="status">
 						<c:choose>
 							<c:when test="${status.index==0}">
-								<div style="width:25%; float:left;">
-									<img src="${list.imageURL}" style="width: 350px; height: 350px; margin-right: 30px;">
-									<h4>${list.title}</h4>
-									"${fn:substring(list.contents,0,79)}"
+								<div style="width:30%; float:left;">
+									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
+									<h5 style="text-align:center;">${list.title}</h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
 								</div>
 							</c:when>
 							<c:otherwise>
-								<div style="margin-left:500px;">	
-								<h4>${list.title}</h4>
-								"${fn:substring(list.contents,0,79)}"
-								<br><br><br><br>
+								<div style="text-align:center; width:60%; float:right;">	
+									<h5 style="text-align:left;">${list.title}</h5>
+									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									<br>
 								</div>	
 							</c:otherwise>
 						</c:choose>
 					</c:forEach>
 				</div>
-				<div id="tabs__content5" class="tabs__content" data-tab="5">
+				<div id="tabs__content5" class="tabs__content" data-tab="5" style="width:90%; margin: auto;">
 					<c:forEach items="${newsList5}" var="list" varStatus="status">
 						<c:choose>
 							<c:when test="${status.index==0}">
-								<div style="width:25%; float:left;">
-									<img src="${list.imageURL}" style="width: 350px; height: 350px; margin-right: 30px;">
-									<h4>${list.title}</h4>
-									"${fn:substring(list.contents,0,79)}"
+								<div style="width:30%; float:left;">
+									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
+									<h5 style="text-align:center;">${list.title}</h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
 								</div>
 							</c:when>
 							<c:otherwise>
-								<div style="margin-left:500px;">	
-								<h4>${list.title}</h4>
-								"${fn:substring(list.contents,0,79)}"
-								<br><br><br><br>
+								<div style="text-align:center; width:60%; float:right;">	
+									<h5 style="text-align:left;">${list.title}</h5>
+									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									<br>
 								</div>	
 							</c:otherwise>
 						</c:choose>
@@ -703,119 +679,82 @@ $(document).ready(function(){
 			<label for="tab9" id="it"><i class="fa fa-envelope-o"></i><br><span>IT</span></label>
 			
 			<section id="content1" class="tab-content input_style">
-			<input type="radio" id="all-radio-wordcloud" name="select-chart" value="all-radio-wordcloud">워드클라우드
-			<input type="radio" id="all-radio-barchart" name="select-chart" value="all-radio-barchart">막대그래프
 				<h3>전체 카테고리</h3>
 		      	<figure class="highcharts-figure">
 				    <div id="all-wordcloud" style="height:600px;"></div>
 				    <div id="all-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
+				
 				</figure>
 			</section>
 		
 			<section id="content2" class="tab-content input_style">
-			<input type="radio" id="society-radio-wordcloud" name="select-chart" value="society-radio-wordcloud">워드클라우드
-			<input type="radio" id="society-radio-barchart" name="select-chart" value="society-radio-barchart">막대그래프
 				<h3>사회 카테고리</h3>
 		      	<figure class="highcharts-figure">
 				    <div id="society-wordcloud" style="height:600px;"></div>
 				    <div id="society-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
+				
 				</figure>
 			</section>
 		
 			<section id="content3" class="tab-content input_style">
-			<input type="radio" id="entertainment-radio-wordcloud" name="select-chart" value="entertainment-radio-wordcloud">워드클라우드
-			<input type="radio" id="entertainment-radio-barchart" name="select-chart" value="entertainment-radio-barchart">막대그래프
 				<h3>연예 카테고리</h3>
 		      	<figure class="highcharts-figure">
 				    <div id="entertainment-wordcloud" style="height:600px;"></div>
 				    <div id="entertainment-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
+				
 				</figure>
 			</section>
 		
 			<section id="content4" class="tab-content input_style">
-			<input type="radio" id="economy-radio-wordcloud" name="select-chart" value="economy-radio-wordcloud">워드클라우드
-			<input type="radio" id="economy-radio-barchart" name="select-chart" value="economy-radio-barchart">막대그래프
 				<h3>경제 카테고리</h3>
 		      	<figure class="highcharts-figure">
 				    <div id="economy-wordcloud" style="height:600px;"></div>
 				    <div id="economy-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
+				
 				</figure>
 			</section>
 		
 			<section id="content5" class="tab-content input_style">
-			<input type="radio" id="politics-radio-wordcloud" name="select-chart" value="politics-radio-wordcloud">워드클라우드
-			<input type="radio" id="politics-radio-barchart" name="select-chart" value="politics-radio-barchart">막대그래프
 				<h3>정치 카테고리</h3>
 		      	<figure class="highcharts-figure">
 				    <div id="politics-wordcloud" style="height:600px;"></div>
 				    <div id="politics-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
+
 				</figure>
 			</section>
 			
 			<section id="content6" class="tab-content input_style">
-			<input type="radio" id="sport-radio-wordcloud" name="select-chart" value="sport-radio-wordcloud">워드클라우드
-			<input type="radio" id="sport-radio-barchart" name="select-chart" value="sport-radio-barchart">막대그래프
 				<h3>스포츠 카테고리</h3>
 		      	<figure class="highcharts-figure">
 				    <div id="sport-wordcloud" style="height:600px;"></div>
 				    <div id="sport-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
+			
 				</figure>
 			</section>
 			
 			<section id="content7" class="tab-content input_style">
-			<input type="radio" id="culture-radio-wordcloud" name="select-chart" value="culture-radio-wordcloud">워드클라우드
-			<input type="radio" id="culture-radio-barchart" name="select-chart" value="culture-radio-barchart">막대그래프
 				<h3>문화 카테고리</h3>
 		      	<figure class="highcharts-figure">
 				    <div id="culture-wordcloud" style="height:600px;"></div>
 				    <div id="culture-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
+		
 				</figure>
 			</section>
 			
 			<section id="content8" class="tab-content input_style">
-			<input type="radio" id="global-radio-wordcloud" name="select-chart" value="global-radio-wordcloud">워드클라우드
-			<input type="radio" id="global-radio-barchart" name="select-chart" value="global-radio-barchart">막대그래프
 				<h3>국제 카테고리</h3>
 		      	<figure class="highcharts-figure">
 				    <div id="global-wordcloud" style="height:600px;"></div>
 				    <div id="global-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
 				</figure>
 			</section>
 			
 			<section id="content9" class="tab-content input_style">
-			<input type="radio" id="it-radio-wordcloud" name="select-chart" value="it-radio-wordcloud">워드클라우드
-			<input type="radio" id="it-radio-barchart" name="select-chart" value="it-radio-barchart">막대그래프
 				<h3>IT 카테고리</h3>
 		      	<figure class="highcharts-figure">
 					<div id="it-wordcloud" style="height:600px;"></div>
 				    <div id="it-barchart" style="height:700px;"></div>
-				    <p class="highcharts-description">
-			        	카테고리의 워드클라우드 설명글
-				    </p>
+
 				</figure>
 			</section>
 		</div>

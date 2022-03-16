@@ -2,11 +2,12 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>  
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Result Page</title>
 	<link rel="apple-touch-icon" sizes="76x76" href="resources/assets/img/apple-icon.png">
 	<link rel="icon" type="image/png" href="resources/assets/img/favicon.png">
 	<!--     Fonts and icons     -->
@@ -115,6 +116,7 @@
 	  border-radius: 0 4px 4px 0;
 	  background-color: rgba(0, 150, 136, 0.8);
 	}
+
 </style>
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
@@ -138,10 +140,32 @@ $(document).ready(function(){
 	})
 });
 $(function() {
+	data = <%= request.getAttribute("jsonArray")%>;
+	
+	Highcharts.chart('Highcharts', {
+	    accessibility: {
+	        screenReaderSection: {
+	            beforeChartFormat: '<h5>{chartTitle}</h5>' +
+	                '<div>{chartSubtitle}</div>' +
+	                '<div>{chartLongdesc}</div>' +
+	                '<div>{viewTableButton}</div>'
+	        }
+	    },
+	    series: [{
+	        type: 'wordcloud',
+	        data,
+	        name: 'Occurrences'
+	    }],
+	    title: {
+	        text: ''
+	    }
+	});
+	
+	
 	$("#searchBox").autocomplete({
 		source : function(request, response) {
 			$.ajax({
-				url : "api/v1/autocomplete",
+				url : "/api/v1/autocomplete",
 				dataType : "jsonp",
 				data: {
 					term: request.term
@@ -160,16 +184,17 @@ $(function() {
 <div style="height:100px">
 <jsp:include page="../views/include/header.jsp"></jsp:include>
 </div>
-	<div class="card card-body blur shadow-blur mx-3 mx-md-4 mt-n6"
-		style="resize: vertical;">
+	<div class="card card-body blur shadow-blur mx-3 mx-md-4 mt-n6" style="resize: vertical;">
 
 		<section class="pt-3 pb-4" id="count-stats">
 			<div class="container">
 				<div class="row">
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
+						<img src="resources/assets/img/logo1.jpg" style="display: block; margin: 0px auto; width:400px;">
 							<form action="/news" method="GET" enctype="multipart/form-data">
-								<input class="textbox" id="searchBox" name="search" placeholder="Search" type="text" value="${search}"> 
+								<input class="textbox" value="${question}" style="border: 1px solid #32AAA0;" id="searchBox" name="question" placeholder="Search" type="text"> 
+								<input type=hidden name="pageNum" value=1 >
 								<input title="Search" value="" type="submit" class="button">
 							</form>
 						</div>
@@ -177,17 +202,21 @@ $(function() {
 				</div>
 			</div>
 
-			<div class="leftContents">
-			<!-- contents -->
-					<div class="newsContents">
-				<c:forEach items="${newsList}" var="num" varStatus="status">
-				<c:if test="${status.index%3==0 }">
-					<div class="card-group">
-				</c:if>
-						<div class="card" data-animation="true" style="margin:10px; margin-bottom:50px;">
-							<div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-								<a class="d-block blur-shadow-image" style="text-align: center;"> <img
-									src="${num.thumbnailUrl}" alt="img-blur-shadow" class="img-fluid shadow border-radius-lg" style="height:200px;">
+			<div class="leftContents" style="border-radius: 20px; background-color: #F7F7F7;">
+				<!-- contents -->
+				<div class="newsContents">
+					<c:forEach items="${newsList}" var="news" varStatus="status">
+						<c:if test="${status.index%3==0 }">
+							<div class="card-group">
+						</c:if>
+						<div class="card" data-animation="true"
+							style="margin: 10px; margin-bottom: 50px;">
+							<div
+								class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+								<a class="d-block blur-shadow-image" style="text-align: center;">
+									<img src="${news.thumbnailUrl}" alt="img-blur-shadow"
+									class="img-fluid shadow border-radius-lg"
+									style="height: 200px;">
 								</a>
 								<div class="colored-shadow"
 									style="background-image: url(&quot;https://demos.creative-tim.com/test/material-dashboard-pro/assets/img/products/product-1-min.jpg&quot;);"></div>
@@ -195,101 +224,94 @@ $(function() {
 							<div class="card-body text-center">
 								<div class="d-flex mt-n6 mx-auto">
 									<div style="width: 50%">
-										<h6 style="text-align: center;">${num.press}</h6>
+										<h6 style="text-align: center;">${news.press}</h6>
 									</div>
 									<div style="width: 50%">
-										<h6 style="text-align: center;">${num.newsDate}</h6>
+										<h6 style="text-align: center;">${news.newsDate}</h6>
 									</div>
 								</div>
 								<h5 class="font-weight-normal mt-3">
-									<a class="myBtn_multi" href="javascript:;">${num.title}</a>
+									<a class="myBtn_multi" href="javascript:;">${news.title}</a>
 								</h5>
-								<p style="font-size:11px">
-									${num.fragments} ...
-								</p>	
-							
+								<p style="font-size: 11px">${news.fragments} ...</p>
+
 								<!-- Modal -->
 
 
 								<!-- The Modal -->
 								<div class="modal modal_multi">
 									<!-- Modal content -->
-									<div class="modal-content" style="width:900px;">
-										
+									<div class="modal-content" style="width: 900px;">
 										<div class="modal-header">
-											<h3>${num.title}</h3>
+											<h3>${news.title}</h3>
 											<span class="close close_multi">×</span>
 										</div>
 										<div class="modal-body">
-											<img src="${num.imageUrl}" style="width:600px; height:600px;">
+											<img src="${news.imageUrl}"
+												style="width: 600px; height: 600px;">
 											<% pageContext.setAttribute("replaceChar", "\n"); %>
-											<p style="text-align:left; line-height:250%; margin: 80px;">${fn:replace(num.contents, replaceChar, "<br/>")}</p>
+											<p style="text-align: left; line-height: 250%; margin: 80px;">${fn:replace(news.contents, replaceChar, "<br/>")}</p>
 										</div>
 										<div class="modal-footer">
-									      	<h3>${num.press}</h3>
-									    </div>
+											<h3>${news.press}</h3>
+										</div>
 									</div>
 								</div>
 								<!-- end Modal -->
 							</div>
 						</div>
-				<c:if test="${status.index%3==2 || status.last }">
-					</div>
+						<c:if test="${status.index%3==2 || status.last }">
+				</div>
 				</c:if>
 				</c:forEach>
-				</div>
-				<!-- /end contents -->
-				
-				<!-- 페이징 -->
 				<div class="row justify-space-between py-2">
 					<div class="col-lg-4 mx-auto">
 						<ul class="pagination pagination-primary m-4">
-							<!-- 이전페이지 버튼 -->
-							<c:if test="${pageMaker.prev}">
-								<li class="page-item"><a class="material-icons"
-									href="${pageMaker.startPage-1}">Previous</a></li>
+							<c:if test="${pageNum > 1}">
+								<li class="page-item"><a class="page-link" href="/news?question=${question}&pageNum=${pageNum - 1}" aria-label="Previous"> 
+									<span aria-hidden="true"><i class="material-icons" aria-hidden="true">chevron_left</i></span></a>
+								</li>
 							</c:if>
 
-							<!-- 각 번호 페이지 버튼 -->
-							<c:forEach var="num" begin="${pageMaker.startPage}"
-								end="${pageMaker.endPage}">
-								<li class="page-item ${pageMaker.cri.pageNum == num ? "active":"" }"><a
-									class="page-link"
-									href="localhost:8080/result?search=${search}&page=${num}">${num}</a></li>
+							<c:forEach begin="${pageStart}" end="${pageEnd}"
+								varStatus="status">
+								<c:choose>
+									<c:when test="${status.index > pageTotal}">
+										<c:set var="doneLoop" value="true" />
+									</c:when>
+									<c:when test="${pageNum == status.index}">
+										<li class="page-item active"><a class="page-link" href="/news?question=${question}&pageNum=${status.index}">${status.index}</a></li>
+									</c:when>
+									<c:otherwise>
+										<li class="page-item"><a class="page-link" href="/news?question=${question}&pageNum=${status.index}">${status.index}</a></li>
+									</c:otherwise>
+								</c:choose>
 							</c:forEach>
 
-							<!-- 다음페이지 버튼 -->
-							<c:if test="${pageMaker.next}">
-								<li class="page-item"><a class="material-icons"
-									href="${pageMaker.endPage + 1 }">Next</a></li>
+							<c:if test="${pageNum < pageTotal}">
+								<li class="page-item"><a class="page-link"
+									href="/news?question=${question}&pageNum=${pageNum + 1}"
+									aria-label="Next"> <span aria-hidden="true"><i
+											class="material-icons" aria-hidden="true">chevron_right</i></span>
+								</a></li>
 							</c:if>
 						</ul>
 					</div>
 				</div>
-
 			</div>
-
-			<div id="rightContents" style="width: 20%; float: right; padding:100px 20px;">
-				<div id="rightKeyword" style="text-align: center;">
-					
-				</div>
-				<i class="fa-solid fa-1"></i>
 			</div>
-
-			<form id="moveForm" method="get">
-				<input type="hidden" name="pageNum"
-					value="${pageMaker.cri.pageNum }"> <input type="hidden"
-					name="amount" value="${pageMaker.cri.amount }"> <input
-					type="hidden" name="keyword" value="${pageMaker.cri.keyword }">
-				<input type="hidden" name="type" value="${pageMaker.cri.type }">
-			</form>
-			<!-- /페이징 -->
+			<!-- /end contents -->
+			<div id="rightContents" style="width: 20%; float: right; text-align:center; margin-top:100px;">
+				<h4>-키워드 랭킹-</h4>
+				<div id="rightKeyword" style="text-align: center;"></div>
+			</div>			
 		</section>
+		<figure class="highcharts-figure">
+		<h3 style="text-align:center; margin-top:50px;">"${question} 과(와) 관련된 키워드</h3>
+			    <div id="Highcharts" style="height:600px;"></div>
+			</figure>
 	</div>
 	<jsp:include page="../views/include/footer.jsp"></jsp:include>
-
-
-	
 <script>
 $(document).ready(function(){
 	// Get the modal
@@ -368,15 +390,6 @@ $(document).ready(function(){
     span.onclick = function() {
         modal.style.display = "none";
     }
-	
-	
-	$(".pagination a").on("click", function(e){
-		e.preventDefault();
-		moveForm.find("input[name='pageNum']").val($(this).attr("href"));
-		moveForm.attr("action", "/results");
-		moveForm.submit();
-		
-	});	
 });
 </script>
 
