@@ -453,7 +453,7 @@ $(document).ready(function(){
 <body class="index-page bg-gray-200">
 
 	<header class="header-2">
-		<div class="page-header min-vh-75 relative" style="background-image: url('resources/assets/img/mainBG2.png')">
+		<div style="height:180px;">
 			<span class="mask bg-gradient-primary opacity-0"></span>
 			<div class="container">
 				<div class="row">
@@ -466,12 +466,14 @@ $(document).ready(function(){
 	</header>
 
 	<div class="card card-body blur shadow-blur mx-3 mx-md-4 mt-n6">
-
 		<section class="pt-3 pb-4" id="count-stats">
 			<div class="container">
 				<div class="row">
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
+						<div style="text-align:center;">
+						<img src="resources/assets/img/logo1.jpg" style="width:40%">
+						</div>
 						    <form action="/news" method="GET" enctype="multipart/form-data">
 					      		<input class="textbox" style="border: 1px solid #32AAA0;" id="searchBox" name="question" placeholder="Search" type="text">
 					      		<input type=hidden name="pageNum" value=1 >
@@ -488,19 +490,19 @@ $(document).ready(function(){
 			<div id="issueTabs" class="tabs" style="margin-top:50px;">
 				<div class="tabs__sidebar">
 					<c:forEach var="list" items="${newsList1}" begin="0" end="0">
-						<button class="tabs__button tabs__button--active" data-for-tab="1" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><p>${cnt1}건</p></button>
+						<button class="tabs__button tabs__button--active" data-for-tab="1" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt1}건</div></button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList2}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="2" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><p>${cnt2}건</p></button>
+						<button class="tabs__button" data-for-tab="1" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt2}건</div></button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList3}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="3" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><p>${cnt3}건</p></button>
+						<button class="tabs__button" data-for-tab="3" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt3}건</div></button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList4}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="4" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><p>${cnt4}건</p></button>
+						<button class="tabs__button" data-for-tab="4" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt4}건</div></button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList5}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="5" style="width:18%; height: 130px;font-size: smallers;">${list.title} <br><p>${cnt5}건</p></button>
+						<button class="tabs__button" data-for-tab="5" style="width:18%; height: 130px;font-size: smallers;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt5}건</div></button>
 					</c:forEach>
 
 				</div>
@@ -510,8 +512,8 @@ $(document).ready(function(){
 							<c:when test="${status.index==0}">
 								<div style="width:30%; float:left;">
 									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
-									<h5 style="text-align:center;"><a class="myBtn_multi" href="javascript:;">${list.title}</a></h5>
-									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
+									<h5 style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
 									
 									<!-- The Modal -->
 									<div class="modal modal_multi" style="display:none;">
@@ -537,16 +539,16 @@ $(document).ready(function(){
 							</c:when>
 							<c:otherwise>
 								<div style="text-align:center; width:60%; float:right;">	
-								<h5 class="font-weight-normal mt-3"><a class="myBtn_multi" href="javascript:;">${list.title}</a></h5>
+								<h5 class="font-weight-normal mt-3" style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
 									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
-									<br>
+									
 									
 									<!-- The Modal -->
 									<div class="modal modal_multi" style="display:none;">
 										<!-- Modal content -->
 										<div class="modal-content" style="width: 900px;">
 											<div class="modal-header">
-												<h3>${list.title}</h3>
+												<h3 style="color:black;">${list.title}</h3>
 												<span class="close close_multi">×</span>
 											</div>
 											<div class="modal-body">
@@ -573,15 +575,57 @@ $(document).ready(function(){
 							<c:when test="${status.index==0}">
 								<div style="width:30%; float:left;">
 									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
-									<h5 style="text-align:center;">${list.title}</h5>
-									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
+									<h5 style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3>${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+									
 								</div>
 							</c:when>
 							<c:otherwise>
 								<div style="text-align:center; width:60%; float:right;">	
-									<h5 style="text-align:left;">${list.title}</h5>
+								<h5 class="font-weight-normal mt-3" style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
 									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
-									<br>
+									
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3 style="color:black;">${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px; color:black;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+										
 								</div>	
 							</c:otherwise>
 						</c:choose>
@@ -593,15 +637,57 @@ $(document).ready(function(){
 							<c:when test="${status.index==0}">
 								<div style="width:30%; float:left;">
 									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
-									<h5 style="text-align:center;">${list.title}</h5>
-									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
+									<h5 style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3>${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+									
 								</div>
 							</c:when>
 							<c:otherwise>
 								<div style="text-align:center; width:60%; float:right;">	
-									<h5 style="text-align:left;">${list.title}</h5>
+								<h5 class="font-weight-normal mt-3" style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
 									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
-									<br>
+									
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3 style="color:black;">${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px; color:black;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+										
 								</div>	
 							</c:otherwise>
 						</c:choose>
@@ -613,15 +699,57 @@ $(document).ready(function(){
 							<c:when test="${status.index==0}">
 								<div style="width:30%; float:left;">
 									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
-									<h5 style="text-align:center;">${list.title}</h5>
-									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
+									<h5 style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3>${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+									
 								</div>
 							</c:when>
 							<c:otherwise>
 								<div style="text-align:center; width:60%; float:right;">	
-									<h5 style="text-align:left;">${list.title}</h5>
+								<h5 class="font-weight-normal mt-3" style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
 									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
-									<br>
+									
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3 style="color:black;">${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px; color:black;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+										
 								</div>	
 							</c:otherwise>
 						</c:choose>
@@ -633,15 +761,57 @@ $(document).ready(function(){
 							<c:when test="${status.index==0}">
 								<div style="width:30%; float:left;">
 									<img src="${list.imageURL}" style="width: 250px; height: 250px; display: block; margin: 0px auto;">
-									<h5 style="text-align:center;">${list.title}</h5>
-									<p style="text-align:left;">"${fn:substring(list.contents,0,79)}"<strong>...</strong></p>
+									<h5 style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
+									<p style="text-align:left;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3>${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+									
 								</div>
 							</c:when>
 							<c:otherwise>
 								<div style="text-align:center; width:60%; float:right;">	
-									<h5 style="text-align:left;">${list.title}</h5>
+								<h5 class="font-weight-normal mt-3" style="text-align:left;"><a class="myBtn_multi" href="javascript:;" style="color: black;">${list.title}</a></h5>
 									<p style="text-align: left; font-size: 12px;">"${fn:substring(list.contents,0,120)}"<strong>...</strong></p>
-									<br>
+									
+									
+									<!-- The Modal -->
+									<div class="modal modal_multi" style="display:none;">
+										<!-- Modal content -->
+										<div class="modal-content" style="width: 900px;">
+											<div class="modal-header">
+												<h3 style="color:black;">${list.title}</h3>
+												<span class="close close_multi">×</span>
+											</div>
+											<div class="modal-body">
+												<img src="${list.imageURL}" style="width: 600px; height: 600px;">
+												<% pageContext.setAttribute("replaceChar", "\n"); %>
+												<p style="text-align: left; line-height: 250%; margin: 80px; color:black;">${fn:replace(list.contents, replaceChar, "<br/>")}</p>
+											</div>
+											<div class="modal-footer">
+												<h3>${list.press}</h3>
+											</div>
+										</div>
+									</div>
+									<!-- end Modal -->
+										
 								</div>	
 							</c:otherwise>
 						</c:choose>
@@ -655,28 +825,28 @@ $(document).ready(function(){
 			<label for="tab1" id="전체"><i class="fa fa-circle-o-notch"></i><br><span>전체</span></label>
 		
 			<input id="tab2" type="radio" name="cateogryName" class="input_style" value="society">
-			<label for="tab2" id="사회"><i class="fa fa-pencil-square-o"></i><br><span>사회</span></label>
+			<label for="tab2" id="사회"><i class="fa fa-users"></i><br><span>사회</span></label>
 		
 			<input id="tab3" type="radio" name="cateogryName" class="input_style" value="entertainment">
-			<label for="tab3" id="연예"><i class="fa fa-bar-chart-o"></i><br><span>연예</span></label>
+			<label for="tab3" id="연예"><i class="fa fa-microphone"></i><br><span>연예</span></label>
 		
 			<input id="tab4" type="radio" name="cateogryName" class="input_style" value="economy">
-			<label for="tab4" id="경제"><i class="fa fa-folder-open-o"></i><br><span>경제</span></label>
+			<label for="tab4" id="경제"><i class="fa fa-usd"></i><br><span>경제</span></label>
 		
 			<input id="tab5" type="radio" name="cateogryName" class="input_style" value="politics">
-			<label for="tab5" id="정치"><i class="fa fa-envelope-o"></i><br><span>정치</span></label>
+			<label for="tab5" id="정치"><i class="fa fa-university"></i><br><span>정치</span></label>
 			
 			<input id="tab6" type="radio" name="cateogryName" class="input_style" value="sport">
-			<label for="tab6" id="스포츠"><i class="fa fa-envelope-o"></i><br><span>스포츠</span></label>
+			<label for="tab6" id="스포츠"><i class="fa fa-futbol-o"></i><br><span>스포츠</span></label>
 			
 			<input id="tab7" type="radio" name="cateogryName" class="input_style" value="culture">
-			<label for="tab7" id="문화"><i class="fa fa-envelope-o"></i><br><span>문화</span></label>
+			<label for="tab7" id="문화"><i class="fa fa-handshake-o"></i><br><span>문화</span></label>
 			
 			<input id="tab8" type="radio" name="cateogryName" class="input_style" value="global">
-			<label for="tab8" id="국제"><i class="fa fa-envelope-o"></i><br><span>국제</span></label>
+			<label for="tab8" id="국제"><i class="fa fa-globe"></i><br><span>국제</span></label>
 			
 			<input id="tab9" type="radio" name="cateogryName" class="input_style" value="it">
-			<label for="tab9" id="it"><i class="fa fa-envelope-o"></i><br><span>IT</span></label>
+			<label for="tab9" id="it"><i class="fa fa-laptop"></i><br><span>IT</span></label>
 			
 			<section id="content1" class="tab-content input_style">
 				<h3>전체 카테고리</h3>

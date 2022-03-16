@@ -126,18 +126,19 @@ $(document).ready(function(){
 		url : "/risings",
 		type : "POST",
 		data:{
-			
+		
 		},
 		success: function(data){
 			for(i=0; i<data.length; i++){
-                    $("#rightKeyword").append("<p><h4>" + (i+1) + ". " + data[i].keyword + "</h4></p>");
+                    $("#rightKeyword").append('<a href="/news?question=' + data[i].keyword + '&pageNum=1">' + (i+1) + ". " + data[i].keyword + "<b style='text-align:right'>" + data[i].btfRatio + "</b></a><br>");   
                }
+	
 		},
 		error : function(e) {
 			console.log("ERROR:", e);
 			alert("fail");
 		}
-	})
+	});
 });
 $(function() {
 	data = <%= request.getAttribute("jsonArray")%>;
@@ -197,6 +198,11 @@ $(function() {
 								<input type=hidden name="pageNum" value=1 >
 								<input title="Search" value="" type="submit" class="button">
 							</form>
+							<div>
+								<c:forEach var="wordList" items="${words}"> 
+									<a href="/news?question=${wordList}&pageNum=1">${wordList}</a>
+								</c:forEach>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -301,9 +307,10 @@ $(function() {
 			</div>
 			</div>
 			<!-- /end contents -->
-			<div id="rightContents" style="width: 20%; float: right; text-align:center; margin-top:100px;">
-				<h4>-키워드 랭킹-</h4>
-				<div id="rightKeyword" style="text-align: center;"></div>
+			<div id="rightContents" style="width: 20%; float: right; margin-top:100px;">
+				<h4 style="text-align:center;">-키워드 랭킹-</h4>
+				<div id="rightKeyword" style="margin-left:27%; text-align:left; float:left; width:40%;"></div>
+				<div id="rightRatio" style="text-align:left; float:left; width:40%;"></div>
 			</div>			
 		</section>
 		<figure class="highcharts-figure">

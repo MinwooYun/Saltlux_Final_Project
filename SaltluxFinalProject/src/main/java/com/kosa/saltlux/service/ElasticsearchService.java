@@ -199,7 +199,7 @@ public class ElasticsearchService {
 		
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 
-		SearchRequest searchRequest = new SearchRequest("news");
+		SearchRequest searchRequest = new SearchRequest("news3");
 
 		List<Object> result = new ArrayList<>();
 		
@@ -273,7 +273,7 @@ public class ElasticsearchService {
 		
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 		
-		CountRequest countRequest = new CountRequest("news"); 
+		CountRequest countRequest = new CountRequest("news3"); 
 		CountResponse countResponse = restHighLevelClientSSLIgnore.count(countRequest, RequestOptions.DEFAULT);
 		System.out.println(countResponse.getCount());
 		
@@ -301,7 +301,7 @@ public class ElasticsearchService {
 		
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 
-		SearchRequest searchRequest = new SearchRequest("news");
+		SearchRequest searchRequest = new SearchRequest("news3");
 		
 		// 검색 조건 필터 : nouns 필드만 포함
 		String[] includes = new String[]{"nouns"};

@@ -48,15 +48,15 @@ public class ElasticController {
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
 	// 추천검색어
-	@GetMapping(value = "/api/v1/suggestion-terms")
-	public String suggestionTerms(Model model, @RequestParam String term) throws Exception {
-		
-		// 여기 만들어야 됨.
-		
-		model.addAttribute("words", elasticsearchService.getSuggestionTerms(term));
-		
-		return null;
-	}
+//	@RequestMapping(value = "/api/v1/suggestion-terms", method = RequestMethod.POST)
+//	public String suggestionTerms(Model model, @RequestParam String term) throws Exception {
+//		System.out.println("suggestion 입니다.");
+//		// 여기 만들어야 됨.
+//		System.out.println(elasticsearchService.getSuggestionTerms(term));
+//		
+//		
+//		return null;
+//	}
 	
 	// 자동완성
 	@GetMapping(value= "api/v1/autocomplete")
@@ -104,7 +104,7 @@ public class ElasticController {
 //		System.out.println(values);
 
 		model.addAttribute("jsonArray", jsonArray);
-
+		model.addAttribute("words", elasticsearchService.getSuggestionTerms(question));
 		
 		long pageTotal = elasticsearchService.count();
 		int pageStart = ((pageNum - 1) / 10) * 10 + 1;

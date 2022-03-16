@@ -63,16 +63,28 @@
 	</select>
 	
 	<select id="getMainDashBoardChart" resultType="com.kosa.saltlux.vo.MainDashBoardVO">
-		select KEYWORD  AS keyword
-			  ,CATEGORY AS category
-			  ,BTF      AS btf
-		from luxian.maindashboard
-		WHERE CHAR_LENGTH(keyword) > 1
-		<if test="category != '전체'">
-    		and category = #{category}
-    	</if>
-		order by btf desc
-		limit 70;
+	<choose>
+		<when test="category != '전체'">
+			select KEYWORD  AS keyword,
+			  CATEGORY AS category,
+			  BTF      AS btf
+			from luxian.maindashboard
+			WHERE CHAR_LENGTH(keyword) > 1
+			and category = #{category}
+			order by btf desc
+			limit 70;
+		</when>
+		<otherwise>
+			select KEYWORD  AS keyword,
+				sum(btf) as btf
+			from luxian.maindashboard
+			WHERE CHAR_LENGTH(keyword) > 1
+			group by keyword 
+			order by btf desc
+			limit 70;
+		</otherwise>
+	
+	</choose>
 	</select>
 	
 	<!--  
