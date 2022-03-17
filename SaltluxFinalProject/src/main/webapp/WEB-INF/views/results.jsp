@@ -116,11 +116,117 @@
 	  border-radius: 0 4px 4px 0;
 	  background-color: rgba(0, 150, 136, 0.8);
 	}
+	
+
+h1 span { display:inline-block; animation:float .2s ease-in-out infinite; }
+ @keyframes float {
+  0%,100%{ transform:none; }
+  33%{ transform:translateY(-1px) rotate(-2deg); }
+  66%{ transform:translateY(1px) rotate(2deg); }
+}
+body:hover span { animation:bounce .6s; }
+@keyframes bounce {
+  0%,100%{ transform:translate(0); }
+  25%{ transform:rotateX(20deg) translateY(2px) rotate(-3deg); }
+  50%{ transform:translateY(-20px) rotate(3deg) scale(1.1);  }
+}
+
+span:nth-child(4n) { color:hsl(50, 75%, 55%); text-shadow:1px 1px hsl(50, 75%, 45%), 2px 2px hsl(50, 45%, 45%), 3px 3px hsl(50, 45%, 45%), 4px 4px hsl(50, 75%, 45%); }
+span:nth-child(4n-1) { color:hsl(135, 35%, 55%); text-shadow:1px 1px hsl(135, 35%, 45%), 2px 2px hsl(135, 35%, 45%), 3px 3px hsl(135, 35%, 45%), 4px 4px hsl(135, 35%, 45%); }
+span:nth-child(4n-2) { color:hsl(155, 35%, 60%); text-shadow:1px 1px hsl(155, 25%, 50%), 2px 2px hsl(155, 25%, 50%), 3px 3px hsl(155, 25%, 50%), 4px 4px hsl(140, 25%, 50%); }
+span:nth-child(4n-3) { color:hsl(30, 65%, 60%); text-shadow:1px 1px hsl(30, 45%, 50%), 2px 2px hsl(30, 45%, 50%), 3px 3px hsl(30, 45%, 50%), 4px 4px hsl(30, 45%, 50%); }
+
+h1 span:nth-child(2){ animation-delay:.05s; }
+h1 span:nth-child(3){ animation-delay:.1s; }
+h1 span:nth-child(4){ animation-delay:.15s; }
+h1 span:nth-child(5){ animation-delay:.2s; }
+h1 span:nth-child(6){ animation-delay:.25s; }
+h1 span:nth-child(7){ animation-delay:.3s; }
+h1 span:nth-child(8){ animation-delay:.35s; }
 
 </style>
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
 <script type="text/javascript">
+$(document).ready(function(){
+	// Get the modal
+
+    var modalparent = document.getElementsByClassName("modal_multi");
+
+    // Get the button that opens the modal
+
+    var modal_btn_multi = document.getElementsByClassName("myBtn_multi");
+
+    // Get the <span> element that closes the modal
+    var span_close_multi = document.getElementsByClassName("close_multi");
+
+    // When the user clicks the button, open the modal
+    function setDataIndex() {
+
+        for (i = 0; i < modal_btn_multi.length; i++)
+        {
+            modal_btn_multi[i].setAttribute('data-index', i);
+            modalparent[i].setAttribute('data-index', i);
+            span_close_multi[i].setAttribute('data-index', i);
+        }
+    }
+
+
+
+    for (i = 0; i < modal_btn_multi.length; i++)
+    {
+        modal_btn_multi[i].onclick = function() {
+            var ElementIndex = this.getAttribute('data-index');
+            modalparent[ElementIndex].style.display = "block";
+        };
+
+        // When the user clicks on <span> (x), close the modal
+        span_close_multi[i].onclick = function() {
+            var ElementIndex = this.getAttribute('data-index');
+            modalparent[ElementIndex].style.display = "none";
+        };
+
+    }
+
+    window.onload = function() {
+
+        setDataIndex();
+    };
+
+    window.onclick = function(event) {
+        if (event.target === modalparent[event.target.getAttribute('data-index')]) {
+            modalparent[event.target.getAttribute('data-index')].style.display = "none";
+        }
+
+        // OLD CODE
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+
+//Get the modal
+
+    var modal = document.getElementById('myModal');
+
+//Get the button that opens the modal
+    var btn = document.getElementById("myBtn");
+
+//Get the <span> element that closes the modal
+    var span = modal.getElementsByClassName("close")[0]; // Modified by dsones uk
+
+//When the user clicks on the button, open the modal
+
+    btn.onclick = function() {
+
+        modal.style.display = "block";
+    }
+
+//When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+});
+
 $(document).ready(function(){
 	$.ajax({
 		url : "/risings",
@@ -129,8 +235,9 @@ $(document).ready(function(){
 		
 		},
 		success: function(data){
+			var colorList = new Array("#FF0000","#FF9696","#FF7A85","#FF1493","#BA55D3","#9400D3","#3CA0FF","#78E6E6","#A8F552","#3CA03C");
 			for(i=0; i<data.length; i++){
-                    $("#rightKeyword").append('<a href="/news?question=' + data[i].keyword + '&pageNum=1">' + (i+1) + ". " + data[i].keyword + "<b style='text-align:right'>" + data[i].btfRatio + "</b></a><br>");   
+                    $("#rightKeyword").append('<a href="/news?question=' + data[i].keyword + '&pageNum=1"><label style="color:' + colorList[i] + '; font-size: x-large; line-height: 3;">' + (i+1) + ". " + data[i].keyword + "</label></a><br>");   
                }
 	
 		},
@@ -181,18 +288,30 @@ $(function() {
 </script>
 
 </head>
-<body>
-<div style="height:100px">
 <jsp:include page="../views/include/header.jsp"></jsp:include>
-</div>
-	<div class="card card-body blur shadow-blur mx-3 mx-md-4 mt-n6" style="resize: vertical;">
-
+<body class="index-page bg-gray-200">
+	<header class="header-2">
+		<div style="height:180px;">
+			<span class="mask bg-gradient-primary opacity-0"></span>
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-7 text-center mx-auto">
+						<!-- 배경화면에 글 입력 -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	<div class="card card-body blur shadow-blur mx-3 mx-md-4 mt-n6">
+		
 		<section class="pt-3 pb-4" id="count-stats">
 			<div class="container">
 				<div class="row">
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
-						<img src="resources/assets/img/logo1.jpg" style="display: block; margin: 0px auto; width:400px;">
+						<img src="resources/assets/img/logoBG.png" style="display: block; margin: 0px auto; width:400px;">
+						
+						<h1><span>A</span><span>N</span><span>A</span><span>T</span><span>I</span><span>N</span><span>U</span><span>S</span></h1>
 							<form action="/news" method="GET" enctype="multipart/form-data">
 								<input class="textbox" value="${question}" style="border: 1px solid #32AAA0;" id="searchBox" name="question" placeholder="Search" type="text"> 
 								<input type=hidden name="pageNum" value=1 >
@@ -207,8 +326,9 @@ $(function() {
 					</div>
 				</div>
 			</div>
-
-			<div class="leftContents" style="border-radius: 20px; background-color: #F7F7F7;">
+			</section>
+			<div style="border-radius: 20px; background-color: #F7F7F7;">
+			<div class="leftContents">
 				<!-- contents -->
 				<div class="newsContents">
 					<c:forEach items="${newsList}" var="news" varStatus="status">
@@ -308,97 +428,17 @@ $(function() {
 			</div>
 			<!-- /end contents -->
 			<div id="rightContents" style="width: 20%; float: right; margin-top:100px;">
-				<h4 style="text-align:center;">-키워드 랭킹-</h4>
-				<div id="rightKeyword" style="margin-left:27%; text-align:left; float:left; width:40%;"></div>
-				<div id="rightRatio" style="text-align:left; float:left; width:40%;"></div>
-			</div>			
-		</section>
+				<h3 style="text-align:center;">-키워드 랭킹-</h3>
+				<div id="rightKeyword" style="margin-left:26%; text-align:left; float:left; width:100%;"></div>
+			</div>	
+		</div>		
+		
 		<figure class="highcharts-figure">
 		<h3 style="text-align:center; margin-top:50px;">"${question} 과(와) 관련된 키워드</h3>
 			    <div id="Highcharts" style="height:600px;"></div>
 			</figure>
 	</div>
+
 	<jsp:include page="../views/include/footer.jsp"></jsp:include>
-<script>
-$(document).ready(function(){
-	// Get the modal
-
-    var modalparent = document.getElementsByClassName("modal_multi");
-
-    // Get the button that opens the modal
-
-    var modal_btn_multi = document.getElementsByClassName("myBtn_multi");
-
-    // Get the <span> element that closes the modal
-    var span_close_multi = document.getElementsByClassName("close_multi");
-
-    // When the user clicks the button, open the modal
-    function setDataIndex() {
-
-        for (i = 0; i < modal_btn_multi.length; i++)
-        {
-            modal_btn_multi[i].setAttribute('data-index', i);
-            modalparent[i].setAttribute('data-index', i);
-            span_close_multi[i].setAttribute('data-index', i);
-        }
-    }
-
-
-
-    for (i = 0; i < modal_btn_multi.length; i++)
-    {
-        modal_btn_multi[i].onclick = function() {
-            var ElementIndex = this.getAttribute('data-index');
-            modalparent[ElementIndex].style.display = "block";
-        };
-
-        // When the user clicks on <span> (x), close the modal
-        span_close_multi[i].onclick = function() {
-            var ElementIndex = this.getAttribute('data-index');
-            modalparent[ElementIndex].style.display = "none";
-        };
-
-    }
-
-    window.onload = function() {
-
-        setDataIndex();
-    };
-
-    window.onclick = function(event) {
-        if (event.target === modalparent[event.target.getAttribute('data-index')]) {
-            modalparent[event.target.getAttribute('data-index')].style.display = "none";
-        }
-
-        // OLD CODE
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    };
-
-//Get the modal
-
-    var modal = document.getElementById('myModal');
-
-//Get the button that opens the modal
-    var btn = document.getElementById("myBtn");
-
-//Get the <span> element that closes the modal
-    var span = modal.getElementsByClassName("close")[0]; // Modified by dsones uk
-
-//When the user clicks on the button, open the modal
-
-    btn.onclick = function() {
-
-        modal.style.display = "block";
-    }
-
-//When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-});
-</script>
-
 </body>
 </html>

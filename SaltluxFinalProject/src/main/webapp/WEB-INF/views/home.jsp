@@ -207,6 +207,32 @@ label .fa {
   text-align:center;
 }
 
+h1 span { display:inline-block; animation:float .2s ease-in-out infinite; }
+ @keyframes float {
+  0%,100%{ transform:none; }
+  33%{ transform:translateY(-1px) rotate(-2deg); }
+  66%{ transform:translateY(1px) rotate(2deg); }
+}
+body:hover span { animation:bounce .6s; }
+@keyframes bounce {
+  0%,100%{ transform:translate(0); }
+  25%{ transform:rotateX(20deg) translateY(2px) rotate(-3deg); }
+  50%{ transform:translateY(-20px) rotate(3deg) scale(1.1);  }
+}
+
+span:nth-child(4n) { color:hsl(50, 75%, 55%); text-shadow:1px 1px hsl(50, 75%, 45%), 2px 2px hsl(50, 45%, 45%), 3px 3px hsl(50, 45%, 45%), 4px 4px hsl(50, 75%, 45%); }
+span:nth-child(4n-1) { color:hsl(135, 35%, 55%); text-shadow:1px 1px hsl(135, 35%, 45%), 2px 2px hsl(135, 35%, 45%), 3px 3px hsl(135, 35%, 45%), 4px 4px hsl(135, 35%, 45%); }
+span:nth-child(4n-2) { color:hsl(155, 35%, 60%); text-shadow:1px 1px hsl(155, 25%, 50%), 2px 2px hsl(155, 25%, 50%), 3px 3px hsl(155, 25%, 50%), 4px 4px hsl(140, 25%, 50%); }
+span:nth-child(4n-3) { color:hsl(30, 65%, 60%); text-shadow:1px 1px hsl(30, 45%, 50%), 2px 2px hsl(30, 45%, 50%), 3px 3px hsl(30, 45%, 50%), 4px 4px hsl(30, 45%, 50%); }
+
+h1 span:nth-child(2){ animation-delay:.05s; }
+h1 span:nth-child(3){ animation-delay:.1s; }
+h1 span:nth-child(4){ animation-delay:.15s; }
+h1 span:nth-child(5){ animation-delay:.2s; }
+h1 span:nth-child(6){ animation-delay:.25s; }
+h1 span:nth-child(7){ animation-delay:.3s; }
+h1 span:nth-child(8){ animation-delay:.35s; }
+
 </style>
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
@@ -472,8 +498,9 @@ $(document).ready(function(){
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
 						<div style="text-align:center;">
-						<img src="resources/assets/img/logo1.jpg" style="width:40%">
+							<img src="resources/assets/img/logoBG.png" style="width:40%">
 						</div>
+						<h1><span>A</span><span>N</span><span>A</span><span>T</span><span>I</span><span>N</span><span>U</span><span>S</span></h1>
 						    <form action="/news" method="GET" enctype="multipart/form-data">
 					      		<input class="textbox" style="border: 1px solid #32AAA0;" id="searchBox" name="question" placeholder="Search" type="text">
 					      		<input type=hidden name="pageNum" value=1 >
@@ -490,19 +517,44 @@ $(document).ready(function(){
 			<div id="issueTabs" class="tabs" style="margin-top:50px;">
 				<div class="tabs__sidebar">
 					<c:forEach var="list" items="${newsList1}" begin="0" end="0">
-						<button class="tabs__button tabs__button--active" data-for-tab="1" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt1}건</div></button>
+						<button class="tabs__button tabs__button--active" data-for-tab="1" style="width:18%; height: 130px;font-size: smaller;">
+							<div style="height:100%;">
+								<div style="height:50%;">${list.title}</div>
+								<div style="height:50%; transform: translateY(60%);">${cnt1}건</div>
+							</div>
+						</button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList2}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="1" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt2}건</div></button>
+						<button class="tabs__button" data-for-tab="2" style="width:18%; height: 130px;font-size: smaller;">
+							<div style="height:100%;">
+								<div style="height:50%;">${list.title}</div>
+								<div style="height:50%; transform: translateY(60%);">${cnt2}건</div>
+							</div>
+						</button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList3}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="3" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt3}건</div></button>
+						<button class="tabs__button" data-for-tab="3" style="width:18%; height: 130px;font-size: smaller;">
+							<div style="height:100%;">
+								<div style="height:50%;">${list.title}</div>
+								<div style="height:50%; transform: translateY(60%);">${cnt3}건</div>
+							</div>
+						</button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList4}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="4" style="width:18%; height: 130px;font-size: smaller;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt4}건</div></button>
+						<button class="tabs__button" data-for-tab="4" style="width:18%; height: 130px;font-size: smaller;">
+							<div style="height:100%;">
+								<div style="height:50%;">${list.title}</div>
+								<div style="height:50%; transform: translateY(60%);">${cnt4}건</div>
+							</div>
+						</button>
 					</c:forEach>
 					<c:forEach var="list" items="${newsList5}" begin="0" end="0">
-						<button class="tabs__button" data-for-tab="5" style="width:18%; height: 130px;font-size: smallers;">${list.title} <br><div style="position: fixed; bottom: 0; width: 100%;">${cnt5}건</div></button>
+						<button class="tabs__button" data-for-tab="5" style="width:18%; height: 130px;font-size: smallers;">
+							<div style="height:100%;">
+								<div style="height:50%;">${list.title}</div>
+								<div style="height:50%; transform: translateY(60%);">${cnt5}건</div>
+							</div>
+						</button>
 					</c:forEach>
 
 				</div>
