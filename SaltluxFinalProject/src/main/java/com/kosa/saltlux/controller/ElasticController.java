@@ -78,7 +78,7 @@ public class ElasticController {
 		model.addAttribute("jsonArray", jsonArray);
 		model.addAttribute("words", elasticsearchService.getSuggestionTerms(question));
 		
-		long pageTotal = (long) resultList.get(0).get(0);
+		long pageTotal = Math.round((long) resultList.get(0).get(0)/9);
 		int pageStart = ((pageNum - 1) / 10) * 10 + 1;
 		int pageEnd = pageStart + 9;
 		model.addAttribute("pageTotal", pageTotal);

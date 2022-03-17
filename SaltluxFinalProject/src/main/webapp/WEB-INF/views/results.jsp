@@ -144,6 +144,10 @@ h1 span:nth-child(6){ animation-delay:.25s; }
 h1 span:nth-child(7){ animation-delay:.3s; }
 h1 span:nth-child(8){ animation-delay:.35s; }
 
+a#risingKeyword:hover, a#risingKeyword:active{
+	background-color: #FFFFFF;
+}
+
 </style>
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
@@ -237,7 +241,7 @@ $(document).ready(function(){
 		success: function(data){
 			var colorList = new Array("#FF0000","#FF9696","#FF7A85","#FF1493","#BA55D3","#9400D3","#3CA0FF","#78E6E6","#A8F552","#3CA03C");
 			for(i=0; i<data.length; i++){
-                    $("#rightKeyword").append('<a href="/news?question=' + data[i].keyword + '&pageNum=1"><label style="color:' + colorList[i] + '; font-size: x-large; line-height: 3;">' + (i+1) + ". " + data[i].keyword + "</label></a><br>");   
+                    $("#rightKeyword").append('<a id="risingKeyword" href="/news?question=' + data[i].keyword + '&pageNum=1"><label style="color:' + colorList[i] + '; font-size: x-large; line-height: 3;">' + (i+1) + ". " + data[i].keyword + "</label></a><br>");   
                }
 	
 		},
@@ -288,10 +292,9 @@ $(function() {
 </script>
 
 </head>
-<jsp:include page="../views/include/header.jsp"></jsp:include>
 <body class="index-page bg-gray-200">
 	<header class="header-2">
-		<div style="height:180px;">
+		<div style="height:100px;">
 			<span class="mask bg-gradient-primary opacity-0"></span>
 			<div class="container">
 				<div class="row">
@@ -309,7 +312,7 @@ $(function() {
 				<div class="row">
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
-						<img src="resources/assets/img/logoBG.png" style="display: block; margin: 0px auto; width:400px;">
+						<a href="http://localhost:8080/"><img src="resources/assets/img/logoBG.png" style="display: block; margin: 0px auto; width:400px;"></a>
 						
 						<h1><span>A</span><span>N</span><span>A</span><span>T</span><span>I</span><span>N</span><span>U</span><span>S</span></h1>
 							<form action="/news" method="GET" enctype="multipart/form-data">
@@ -317,11 +320,6 @@ $(function() {
 								<input type=hidden name="pageNum" value=1 >
 								<input title="Search" value="" type="submit" class="button">
 							</form>
-							<div>
-								<c:forEach var="wordList" items="${words}"> 
-									<a href="/news?question=${wordList}&pageNum=1">${wordList}</a>
-								</c:forEach>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -394,6 +392,9 @@ $(function() {
 					<div class="col-lg-4 mx-auto">
 						<ul class="pagination pagination-primary m-4">
 							<c:if test="${pageNum > 1}">
+								<li class="page-item"> <a class="page-link" href="/news?question=${question}&pageNum=1" aria-label="Previous">
+						          <span aria-hidden="true"><i class="fa fa-angle-double-left" aria-hidden="true"></i></span></a>
+						      	</li>
 								<li class="page-item"><a class="page-link" href="/news?question=${question}&pageNum=${pageNum - 1}" aria-label="Previous"> 
 									<span aria-hidden="true"><i class="material-icons" aria-hidden="true">chevron_left</i></span></a>
 								</li>
@@ -420,6 +421,11 @@ $(function() {
 									aria-label="Next"> <span aria-hidden="true"><i
 											class="material-icons" aria-hidden="true">chevron_right</i></span>
 								</a></li>
+								<li class="page-item">
+						        <a class="page-link" href="/news?question=${question}&pageNum=${pageTotal}" aria-label="Next">
+						          <span aria-hidden="true"><i class="fa fa-angle-double-right" aria-hidden="true"></i></span>
+						        </a>
+						      </li>
 							</c:if>
 						</ul>
 					</div>

@@ -233,6 +233,10 @@ h1 span:nth-child(6){ animation-delay:.25s; }
 h1 span:nth-child(7){ animation-delay:.3s; }
 h1 span:nth-child(8){ animation-delay:.35s; }
 
+.myBtn_multi:hover{
+	background-color: #c3ffb966;
+}
+
 </style>
 <script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script	src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
@@ -475,11 +479,9 @@ $(document).ready(function(){
 </script>
 
 </head>
-<jsp:include page="../views/include/header.jsp"></jsp:include>
 <body class="index-page bg-gray-200">
-
 	<header class="header-2">
-		<div style="height:180px;">
+		<div style="height:100px;">
 			<span class="mask bg-gradient-primary opacity-0"></span>
 			<div class="container">
 				<div class="row">
@@ -498,7 +500,7 @@ $(document).ready(function(){
 					<div class="col-lg-9 mx-auto py-3">
 						<div class="row text-center py-2 mt-3">
 						<div style="text-align:center;">
-							<img src="resources/assets/img/logoBG.png" style="width:40%">
+							<a href="http://localhost:8080/"><img src="resources/assets/img/logoBG.png" style="width:40%";></a>
 						</div>
 						<h1><span>A</span><span>N</span><span>A</span><span>T</span><span>I</span><span>N</span><span>U</span><span>S</span></h1>
 						    <form action="/news" method="GET" enctype="multipart/form-data">
@@ -874,31 +876,31 @@ $(document).ready(function(){
 
 		<div class="tab_container">
 			<input id="tab1" type="radio" name="cateogryName" class="input_style" value="all">
-			<label for="tab1" id="전체"><i class="fa fa-circle-o-notch"></i><br><span>전체</span></label>
+			<label for="tab1" id="전체"><i class="fa fa-circle-o-notch" style="margin: auto;"></i><br>전체</label>
 		
 			<input id="tab2" type="radio" name="cateogryName" class="input_style" value="society">
-			<label for="tab2" id="사회"><i class="fa fa-users"></i><br><span>사회</span></label>
+			<label for="tab2" id="사회"><i class="fa fa-users" style="margin: auto;"></i><br>사회</label>
 		
 			<input id="tab3" type="radio" name="cateogryName" class="input_style" value="entertainment">
-			<label for="tab3" id="연예"><i class="fa fa-microphone"></i><br><span>연예</span></label>
+			<label for="tab3" id="연예"><i class="fa fa-microphone" style="margin: auto;"></i><br>연예</label>
 		
 			<input id="tab4" type="radio" name="cateogryName" class="input_style" value="economy">
-			<label for="tab4" id="경제"><i class="fa fa-usd"></i><br><span>경제</span></label>
+			<label for="tab4" id="경제"><i class="fa fa-usd" style="margin: auto;"></i><br>경제</label>
 		
 			<input id="tab5" type="radio" name="cateogryName" class="input_style" value="politics">
-			<label for="tab5" id="정치"><i class="fa fa-university"></i><br><span>정치</span></label>
+			<label for="tab5" id="정치"><i class="fa fa-university" style="margin: auto;"></i><br>정치</label>
 			
 			<input id="tab6" type="radio" name="cateogryName" class="input_style" value="sport">
-			<label for="tab6" id="스포츠"><i class="fa fa-futbol-o"></i><br><span>스포츠</span></label>
+			<label for="tab6" id="스포츠"><i class="fa fa-futbol-o" style="margin: auto;"></i><br>스포츠</label>
 			
 			<input id="tab7" type="radio" name="cateogryName" class="input_style" value="culture">
-			<label for="tab7" id="문화"><i class="fa fa-handshake-o"></i><br><span>문화</span></label>
+			<label for="tab7" id="문화"><i class="fa fa-handshake-o" style="margin: auto;"></i><br>문화</label>
 			
 			<input id="tab8" type="radio" name="cateogryName" class="input_style" value="global">
-			<label for="tab8" id="국제"><i class="fa fa-globe"></i><br><span>국제</span></label>
+			<label for="tab8" id="국제"><i class="fa fa-globe" style="margin: auto;"></i><br>국제</label>
 			
 			<input id="tab9" type="radio" name="cateogryName" class="input_style" value="it">
-			<label for="tab9" id="it"><i class="fa fa-laptop"></i><br><span>IT</span></label>
+			<label for="tab9" id="it"><i class="fa fa-laptop" style="margin: auto;"></i><br>IT</label>
 			
 			<section id="content1" class="tab-content input_style">
 				<h3>전체 카테고리</h3>
