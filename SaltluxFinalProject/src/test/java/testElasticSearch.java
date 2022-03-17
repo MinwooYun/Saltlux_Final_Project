@@ -6,6 +6,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +34,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.hunspell.SuggestionTimeoutException;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.shingle.ShingleFilterFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -40,6 +44,7 @@ import org.apache.lucene.queryparser.xml.builders.TermQueryBuilder;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.suggest.document.FuzzyCompletionQuery;
 import org.apache.taglibs.standard.lang.jstl.test.beans.Factory;
+import org.elasticsearch.action.ActionType;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequestBuilder;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -64,6 +69,7 @@ import org.elasticsearch.client.indices.AnalyzeRequest;
 import org.elasticsearch.client.indices.AnalyzeRequest.CustomAnalyzerBuilder;
 import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.client.indices.AnalyzeResponse.AnalyzeToken;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.Fuzziness;
@@ -86,6 +92,9 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.ReindexAction;
+import org.elasticsearch.index.reindex.ReindexRequest;
+import org.elasticsearch.index.reindex.ReindexRequestBuilder;
 import org.elasticsearch.index.reindex.ScrollableHitSource.Hit;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -95,6 +104,15 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.Suggest.Suggestion;
+import org.elasticsearch.search.suggest.Suggest.Suggestion.Entry;
+import org.elasticsearch.search.suggest.Suggest.Suggestion.Entry.Option;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.SuggestionSearchContext;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -385,8 +403,8 @@ public class testElasticSearch {
 //	}
 	
 	
-	static int idx = 204800;
-	final static int from = 550;
+	static int idx = 1348505;
+	final static int from = 8300;
 	
 	/**
 	 * 
@@ -412,7 +430,7 @@ public class testElasticSearch {
 		FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
 		sourceBuilder.fetchSource(fetchSourceContext);
 		sourceBuilder.from(from);
-		sourceBuilder.size(100); // 1465034
+		sourceBuilder.size(300); // 1465034
 		searchRequest.source(sourceBuilder);
 		
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
@@ -553,13 +571,41 @@ public class testElasticSearch {
 	
 //	@Test
 	public void autoCompletion() throws Exception {
+		
+		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
+
+		String term = "코로나 백";
+		SearchRequest searchRequest = new SearchRequest("auto_completion");
+		
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		SuggestBuilder suggestBuilder = new SuggestBuilder();
+		
+		suggestBuilder.addSuggestion("auto_completion_suggest", SuggestBuilders.completionSuggestion("search_terms.suggest").prefix(term));
+		sourceBuilder.suggest(suggestBuilder);
+		sourceBuilder.size(10);
+		
+		searchRequest.source(sourceBuilder);
+		
+		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
+		
+		System.out.println(searchResponse.getSuggest().filter(CompletionSuggestion.class).stream()
+	      .flatMap(s -> s.getOptions().stream())
+	      .sorted(Comparator.comparingDouble(Suggest.Suggestion.Entry.Option::getScore))
+	      .map(Suggest.Suggestion.Entry.Option::getText)
+	      .map(Text::toString)
+	      .distinct()
+	      .collect(Collectors.toList()));
+	}
+	
+//	@Test
+	public void getSuggestionTerms() throws Exception {
 		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
 
 		SearchRequest searchRequest = new SearchRequest("auto_completion");
 		
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		
-		MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("search_terms.edgengram", "셀");
+		MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("search_terms.edgengram", "코로나 확진자 수");
 		
 		sourceBuilder.query(matchQueryBuilder);
 //		sourceBuilder.aggregation(AggregationBuilders.topHits("duplication").size(1).fetchField("search_terms"));
@@ -578,12 +624,24 @@ public class testElasticSearch {
 			}
 		}
 		
+//		result.sort(new Comparator<Object>() {
+//
+//			@Override
+//			public int compare(Object o1, Object o2) {
+//				String s1 = o1.toString();
+//				String s2 = o2.toString();
+//						
+//				return s1.compareTo(s2);
+//			}
+//			
+//		});
+		
 		System.out.println(result);
 	}
 	
 
 //	@Test
-	public /*List<Object>*/ void searchNews() throws Exception {
+	public void searchNews() throws Exception {
 //		List<String> li = new ArrayList<>();
 //		li.add("서울");
 //		li.add("현재");
@@ -614,8 +672,8 @@ public class testElasticSearch {
 		HighlightBuilder highlightBuilder = new HighlightBuilder();
 		
 		highlightBuilder.field("contents");
-		highlightBuilder.preTags("<AA>");
-		highlightBuilder.postTags("<BB>");
+		highlightBuilder.preTags("<strong>");
+		highlightBuilder.postTags("<strong>");
 		highlightBuilder.fragmentSize(30);
 		
 		sourceBuilder.fetchSource(fetchSourceContext);
@@ -624,6 +682,7 @@ public class testElasticSearch {
 		sourceBuilder.query(multiMatchQueryBuilder);
 		sourceBuilder.from(startPageNum);
 		sourceBuilder.size(9);
+		sourceBuilder.sort("news_date", SortOrder.DESC);
 
 		
 		searchRequest.source(sourceBuilder);
@@ -696,7 +755,7 @@ public class testElasticSearch {
 	}
 	
 	
-	@Test
+//	@Test
 	public void searchNewsForSuggetionTerm() throws Exception {
 
 		String terms = "서울 현재 날씨는?";

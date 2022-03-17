@@ -3,10 +3,14 @@ from flask import Flask, request, jsonify, make_response
 from data_preprocess.keyword_preprocess import get_preprocessed_keyword
 from data_analysis.associated_word import get_total_co_occurrence
 
+import json
+import ast
+
 import sys
 [sys.path.append(i) for i in ['.', '..']]
 
 app = Flask(__name__)
+
 
 '''
     - 검색 문자열 형태소 분석하여 품사 태깅된 명사 리스트 자바에 전달
@@ -29,7 +33,7 @@ def get_refined_keyword():
         print(search_result_list)
 
         associated_words_dic = get_total_co_occurrence(
-                                            doc_info_list=search_result_list, 
+                                            doc_info_list=search_result_list,
                                             search_text_list=refined_data_list,
                                             word_top_size=5,
                                             top_size=30

@@ -43,6 +43,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
@@ -180,7 +181,7 @@ public class ElasticsearchService {
 	}
 	
 	// news 기사 조회
-	public List<Object> searchNews(String question, int pageNum) throws Exception {
+	public List<List<Object>> searchNews(String question, int pageNum) throws Exception {
 		
 		/**
 		 * @author Juhui Park
@@ -201,7 +202,9 @@ public class ElasticsearchService {
 
 		SearchRequest searchRequest = new SearchRequest("news3");
 
-		List<Object> result = new ArrayList<>();
+		List<List<Object>> result = new ArrayList<>();
+		List<Object> countList = new ArrayList<>();
+		List<Object> newsList = new ArrayList<>();
 		
 		// 검색 조건 필터 : nouns 필드 외에 검색 안 되도록
 		String[] includes = null;
@@ -225,10 +228,15 @@ public class ElasticsearchService {
 		sourceBuilder.query(multiMatchQueryBuilder);
 		sourceBuilder.from(startPageNum);
 		sourceBuilder.size(9);
+		sourceBuilder.sort("news_date", SortOrder.DESC);
+		sourceBuilder.sort("_score", SortOrder.DESC);
 
 		
 		searchRequest.source(sourceBuilder);
 		SearchResponse searchResponse = restHighLevelClientSSLIgnore.search(searchRequest, RequestOptions.DEFAULT);
+		
+		// 결과 개수 카운트
+		countList.add(searchResponse.getHits().getTotalHits().value);
 		
 		for (SearchHit hit : searchResponse.getHits().getHits()) {
 			
@@ -249,35 +257,15 @@ public class ElasticsearchService {
 				map.put("fragments", " ");
 			}
 			System.out.println(map);
-			result.add(map);
+			newsList.add(map);
 			
 		}
 		
+		result.add(countList);
+		result.add(newsList);
+		
 		return result;
 
-	}
-	
-	
-	// news인덱스 count 조회
-	public long count() throws Exception {
-		
-		/**
-		 * @author Juhui Park
-		 * 
-		 * 전체 news 기사의 count 값 조회 
-		 * 
-		 * @return count
-		 * 
-		 * 
-		 */
-		
-		RestHighLevelClient restHighLevelClientSSLIgnore = restHighLevelClientSSLIgnore();
-		
-		CountRequest countRequest = new CountRequest("news3"); 
-		CountResponse countResponse = restHighLevelClientSSLIgnore.count(countRequest, RequestOptions.DEFAULT);
-		System.out.println(countResponse.getCount());
-		
-		return countResponse.getCount();
 	}
 	
 	// 파이썬 : 연관검색어 

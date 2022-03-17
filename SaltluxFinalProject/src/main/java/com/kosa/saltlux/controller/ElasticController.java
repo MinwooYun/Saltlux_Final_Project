@@ -2,23 +2,13 @@ package com.kosa.saltlux.controller;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -47,17 +37,6 @@ public class ElasticController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
-	// 추천검색어
-//	@RequestMapping(value = "/api/v1/suggestion-terms", method = RequestMethod.POST)
-//	public String suggestionTerms(Model model, @RequestParam String term) throws Exception {
-//		System.out.println("suggestion 입니다.");
-//		// 여기 만들어야 됨.
-//		System.out.println(elasticsearchService.getSuggestionTerms(term));
-//		
-//		
-//		return null;
-//	}
-	
 	// 자동완성
 	@GetMapping(value= "api/v1/autocomplete")
 	public String autoComplete(Model model, @RequestParam String term) throws Exception {
@@ -69,12 +48,17 @@ public class ElasticController {
    }
 	
 
+	// 뉴스기사 조회
 	@SuppressWarnings("unchecked")
 	@GetMapping(value = "/news")
 	public String searchNews(Model model, @RequestParam String question, @RequestParam int pageNum) throws Exception {
 
-		// 1. 사용자가 검색한 문자열에 대하여 엘라스틱 인덱스에서 조회한 검색 결과 콘텐츠
-		model.addAttribute("newsList", elasticsearchService.searchNews(question, pageNum));
+		
+		List<List<Object>> resultList = elasticsearchService.searchNews(question, pageNum);
+
+		
+		// 1. 뉴스기사 조회
+		model.addAttribute("newsList", resultList.get(1));
 
 		// 2. 사용자가 검색한 문자열에 대하여 플라스크에서 유사 키워드 도출
 		// 해당 타입은 map <사용자 검색 문자열, 엘라스틱에서 조회한 검색 결과 콘텐츠 {nouns, score}>
@@ -90,23 +74,11 @@ public class ElasticController {
 			suggestionObject.put("weight", suggestionMap.get(key));
 			jsonArray.add(suggestionObject);
 		}
-		
-		System.out.println(jsonArray);
-		
-//		System.out.println(suggestionMap);
-		
-		// suggestionMap의 key 값 => 유사 키워드
-//		Set<String> keySet = suggestionMap.keySet();
-//		System.out.println(keySet);
-
-		// suggestionMap의 value 값 => 유사 키워드의 출현 빈도 점수
-//		Collection<Float> values = suggestionMap.values();
-//		System.out.println(values);
 
 		model.addAttribute("jsonArray", jsonArray);
 		model.addAttribute("words", elasticsearchService.getSuggestionTerms(question));
 		
-		long pageTotal = elasticsearchService.count();
+		long pageTotal = (long) resultList.get(0).get(0);
 		int pageStart = ((pageNum - 1) / 10) * 10 + 1;
 		int pageEnd = pageStart + 9;
 		model.addAttribute("pageTotal", pageTotal);
@@ -114,9 +86,7 @@ public class ElasticController {
 		model.addAttribute("pageStart", pageStart);
 		model.addAttribute("pageEnd", pageEnd);
 		model.addAttribute("question", question);
-		
-//		resultBoard(question);
-		
+
 		
 		return "results";
 	}
@@ -177,12 +147,4 @@ public class ElasticController {
 	      return associatedWords;
 	   }
 	
-	
-	// news인덱스 count 조회
-	@GetMapping(value = "/api/v1//count")
-	public String getCount(Model model) throws Exception {
-		model.addAttribute("count", elasticsearchService.count());
-	
-		return "results";
-	}
 }
